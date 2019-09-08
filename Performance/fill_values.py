@@ -4,7 +4,8 @@ import time
 
 t0 = time.time()
 
-formats = ('NETCDF3_CLASSIC', 'NETCDF4')
+#formats = ('NETCDF3_CLASSIC', 'NETCDF4')
+formats = ('NETCDF4', 'NETCDF3_CLASSIC')
 fill_modes = ('off', 'on')
 
 # Create a file.

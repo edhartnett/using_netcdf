@@ -16,4 +16,4 @@ before_script:
 script:
   - autoreconf -i
   - ./configure
-  - make VERBOSE=1 -j distcheck
+  - make -j distcheck

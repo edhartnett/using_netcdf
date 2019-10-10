@@ -3,6 +3,12 @@
 # Ed Hartnett 10/10/2019
 # Amsterdam
 
+# Un comment to use a more verbose test driver
+SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/test-driver-verbose
+LOG_DRIVER = $(SHELL) $(top_srcdir)/test-driver-verbose
+
+TEST_EXTENSIONS = .sh
+
 # Build our test program.
 check_PROGRAMS = glm_read
 

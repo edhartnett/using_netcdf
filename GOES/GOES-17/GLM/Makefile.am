@@ -7,4 +7,6 @@
 check_PROGRAMS = glm_read
 
 # Run our test program.
-TESTS = glm_read
+TESTS = glm_read 
+
+EXTRA_DIST = get_data.sh

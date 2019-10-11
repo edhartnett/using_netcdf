@@ -19,4 +19,4 @@ TESTS = tst_glm.sh
 EXTRA_DIST = tst_glm.sh
 
 # Clean data files for distclean target.
-DIST_CLEAN = *.nc
+DISTCLEANFILES = *.nc

@@ -8,3 +8,6 @@ ACLOCAL_AMFLAGS = -I m4
 
 # Make targets will be run in each subdirectory. Order is significant.
 SUBDIRS = GOES
+
+# Include this file in distribution.
+EXTRA_DIST = test-driver-verbose

@@ -6,9 +6,11 @@
 */
 
 #include <stdio.h>
+#include <netcdf.h>
 
 int main()
 {
     printf("howdy!\n");
+    
     return 0;
 }

@@ -15,4 +15,8 @@ check_PROGRAMS = glm_read
 # Run our test program.
 TESTS = tst_glm.sh 
 
+# Make sure this file is included in distribution.
 EXTRA_DIST = tst_glm.sh
+
+# Clean data files for distclean target.
+DISTCLEAN = *.nc

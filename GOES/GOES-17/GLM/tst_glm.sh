@@ -9,7 +9,8 @@ for f1 in $file_list
 do
     if ! test -f $f1; then
 	echo "Getting GLM test file $f1"
-	wget https://github.com/edhartnett/data_using_netcdf/blob/master/GOES/GOES-17/GLM/$f1
+	wget https://github.com/edhartnett/data_using_netcdf/blob/master/GOES/GOES-17/GLM/${f1}?raw=true
+	mv ${f1}?raw=true ${f1}
     fi
 done
 

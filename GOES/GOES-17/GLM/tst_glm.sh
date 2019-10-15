@@ -15,4 +15,4 @@ do
 done
 
 # Run the test.
-./glm_read
+./glm_read -v

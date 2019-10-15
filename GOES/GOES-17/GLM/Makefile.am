@@ -12,6 +12,8 @@ TEST_EXTENSIONS = .sh
 # Build our test program.
 check_PROGRAMS = glm_read
 
+glm_read_SOURCES = glm_read.c un_test.h
+
 # Run our test program.
 TESTS = tst_glm.sh 
 

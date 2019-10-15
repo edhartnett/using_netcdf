@@ -1,6 +1,6 @@
 /*
   Program to read data from the GOES-17 Global Lightning Mapper.
-  
+
   Ed Hartnett, 10/10/19
   Amsterdam
 */
@@ -9,32 +9,24 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <netcdf.h>
+#include "un_test.h"
 
 /* Attribute names. */
 #define TITLE "title"
 #define SUMMARY "summary"
 #define PLATFORM_ID "platform_ID"
 
-/* This macro prints an error message with line number and name of
- * test program. */
-#define ERR do {                                                                \
-        fflush(stdout); /* Make sure our stdout is synced with stderr. */       \
-        fprintf(stderr, "Sorry! Unexpected result, %s, line: %d\n",             \
-                __FILE__, __LINE__);                                            \
-        fflush(stderr);                                                         \
-        return 2;                                                               \
-    } while (0)
+#define USAGE   "\
+  [-v]        Verbose\n\
+  [-h]        Print output header\n"
 
-/* This macro prints an error message with line number and name of
- * test program, and the netCDF error string. */
-#define NC_ERR(stat) do {                                                       \
-        fflush(stdout); /* Make sure our stdout is synced with stderr. */       \
-        fprintf(stderr, "Sorry! Unexpected result, %s, line: %d %s\n",          \
-                __FILE__, __LINE__, nc_strerror(stat));                         \
-        fflush(stderr);                                                         \
-        return 2;                                                               \
-    } while (0)
+static void
+usage(void)
+{
+   fprintf(stderr, "glm_read -v -h\n%s", USAGE);
+}
 
 /* Read a text attribute and print its value. */
 int
@@ -68,12 +60,26 @@ show_att(int ncid, int varid, char *name)
 }
 
 int
-main()
+main(int argc, char **argv)
 {
     int ncid;
+    int c;
+    int verbose = 0;
     int ret;
     
-    printf("Reading Geostationary Lightning Mapper data\n");
+    while ((c = getopt(argc, argv, "v")) != EOF)
+	switch(c)
+	{
+	case 'v':
+	    verbose++;
+	    break;
+	case '?':
+	    usage();
+	    return 1;
+	}
+
+    if (verbose)
+	printf("Reading Geostationary Lightning Mapper data\n");
 
     /* Open the data file as read-only. */
     if ((ret = nc_open(GLM_DATA_FILE, NC_NOWRITE, &ncid)))
@@ -87,11 +93,12 @@ main()
 	ERR;
     if (show_att(ncid, NC_GLOBAL, SUMMARY))
 	ERR;
-    
+
     /* Close the data file. */
     if ((ret = nc_close(ncid)))
 	NC_ERR(ret);
 
-    printf("SUCCESS!\n");
+    if (verbose)
+	printf("SUCCESS!\n");
     return 0;
 }

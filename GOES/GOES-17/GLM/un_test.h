@@ -4,8 +4,10 @@
  * 10/15/19
  * Amsterdam
  */
-#ifndef _NC_TEST_H
-#define _NC_TEST_H
+#ifndef _UN_TEST_H
+#define _UN_TEST_H
+
+#define MILLION 1000000
 
 /* This macro prints an error message with line number and name of
  * test program. */
@@ -27,4 +29,8 @@
         return 2;							\
     } while (0)
 
-#endif /* _NC_TEST_H */
+/* Prototype from tst_utils.c. */
+int un_timeval_subtract(struct timeval *result, struct timeval *x,
+			struct timeval *y);
+
+#endif /* _UN_TEST_H */

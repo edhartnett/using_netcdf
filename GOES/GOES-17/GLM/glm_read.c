@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/time.h> /* Extra high precision time info. */
+#include <math.h>
 #include <netcdf.h>
 #include "un_test.h"
 
@@ -65,6 +68,8 @@ main(int argc, char **argv)
     int ncid;
     int c;
     int verbose = 0;
+    struct timeval start_time, end_time, diff_time;
+    int meta_read_us = 0;
     int ret;
     
     while ((c = getopt(argc, argv, "v")) != EOF)
@@ -81,6 +86,9 @@ main(int argc, char **argv)
     if (verbose)
 	printf("Reading Geostationary Lightning Mapper data\n");
 
+    if (gettimeofday(&start_time, NULL))
+	ERR;
+    
     /* Open the data file as read-only. */
     if ((ret = nc_open(GLM_DATA_FILE, NC_NOWRITE, &ncid)))
 	NC_ERR(ret);
@@ -93,6 +101,12 @@ main(int argc, char **argv)
 	ERR;
     if (show_att(ncid, NC_GLOBAL, SUMMARY))
 	ERR;
+
+    if (gettimeofday(&end_time, NULL)) ERR;
+    if (un_timeval_subtract(&diff_time, &end_time, &start_time)) ERR;
+    meta_read_us = (int)diff_time.tv_sec * MILLION + (int)diff_time.tv_usec;
+    if (verbose)
+	printf("meta_read_us %d\n", meta_read_us);
 
     /* Close the data file. */
     if ((ret = nc_close(ncid)))

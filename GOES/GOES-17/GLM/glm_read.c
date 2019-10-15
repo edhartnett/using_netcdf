@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/time.h> /* Extra high precision time info. */
+#include <math.h>
 #include <netcdf.h>
 #include "un_test.h"
 

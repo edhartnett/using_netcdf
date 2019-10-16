@@ -21,15 +21,13 @@
 #define SUMMARY "summary"
 #define PLATFORM_ID "platform_ID"
 
+/* Number of timing runs. */
+#define NUM_TRIALS 10
+
+/* Usage description. */
 #define USAGE   "\
   [-v]        Verbose\n\
   [-h]        Print output header\n"
-
-static void
-usage(void)
-{
-   fprintf(stderr, "glm_read -v -h\n%s", USAGE);
-}
 
 /* Read a text attribute and print its value. */
 int
@@ -69,7 +67,9 @@ main(int argc, char **argv)
     int c;
     int verbose = 0;
     struct timeval start_time, end_time, diff_time;
-    int meta_read_us = 0;
+    int meta_read_us = 0, meta_max_read_us = 0, meta_min_read_us = NC_MAX_INT;
+    int meta_tot_read_us = 0, meta_avg_read_us;
+    int t;
     int ret;
     
     while ((c = getopt(argc, argv, "v")) != EOF)
@@ -79,39 +79,52 @@ main(int argc, char **argv)
 	    verbose++;
 	    break;
 	case '?':
-	    usage();
+	    fprintf(stderr, "glm_read -v -h\n%s", USAGE);
 	    return 1;
 	}
 
     if (verbose)
 	printf("Reading Geostationary Lightning Mapper data\n");
 
-    if (gettimeofday(&start_time, NULL))
-	ERR;
+    for (t = 0; t < NUM_TRIALS; t++)
+    {
+	if (gettimeofday(&start_time, NULL))
+	    ERR;
     
-    /* Open the data file as read-only. */
-    if ((ret = nc_open(GLM_DATA_FILE, NC_NOWRITE, &ncid)))
-	NC_ERR(ret);
+	/* Open the data file as read-only. */
+	if ((ret = nc_open(GLM_DATA_FILE, NC_NOWRITE, &ncid)))
+	    NC_ERR(ret);
 
-    /* Read some of the global attributes. The GLM data files comply
-     * with the CF Conventions, and other metadata standards. */
-    if (show_att(ncid, NC_GLOBAL, TITLE))
-	ERR;
-    if (show_att(ncid, NC_GLOBAL, PLATFORM_ID))
-	ERR;
-    if (show_att(ncid, NC_GLOBAL, SUMMARY))
-	ERR;
+	/* Read some of the global attributes. The GLM data files comply
+	 * with the CF Conventions, and other metadata standards. */
+	if (show_att(ncid, NC_GLOBAL, TITLE))
+	    ERR;
+	if (show_att(ncid, NC_GLOBAL, PLATFORM_ID))
+	    ERR;
+	if (show_att(ncid, NC_GLOBAL, SUMMARY))
+	    ERR;
 
-    if (gettimeofday(&end_time, NULL)) ERR;
-    if (un_timeval_subtract(&diff_time, &end_time, &start_time)) ERR;
-    meta_read_us = (int)diff_time.tv_sec * MILLION + (int)diff_time.tv_usec;
+	/* Handle timing. */
+	if (gettimeofday(&end_time, NULL)) ERR;
+	if (un_timeval_subtract(&diff_time, &end_time, &start_time)) ERR;
+	meta_read_us = (int)diff_time.tv_sec * MILLION + (int)diff_time.tv_usec;
+	if (meta_read_us > meta_max_read_us)
+	    meta_max_read_us = meta_read_us;
+	if (meta_read_us < meta_min_read_us)
+	    meta_min_read_us = meta_read_us;
+	meta_tot_read_us += meta_read_us;
+
+	/* Close the data file. */
+	if ((ret = nc_close(ncid)))
+	    NC_ERR(ret);
+    }
+    meta_avg_read_us = meta_tot_read_us / NUM_TRIALS;
     if (verbose)
-	printf("meta_read_us %d\n", meta_read_us);
-
-    /* Close the data file. */
-    if ((ret = nc_close(ncid)))
-	NC_ERR(ret);
-
+    {
+	printf("meta_avg_read_us \t meta_min_read_us \t meta_max_read_us\n");
+	printf("%d\t%d\t%d\n", meta_avg_read_us, meta_min_read_us, meta_max_read_us);
+    }
+    
     if (verbose)
 	printf("SUCCESS!\n");
     return 0;

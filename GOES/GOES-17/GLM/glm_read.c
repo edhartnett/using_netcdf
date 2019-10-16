@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <time.h>
 #include <sys/time.h> /* Extra high precision time info. */
 #include <math.h>
@@ -123,6 +124,7 @@ main(int argc, char **argv)
     int meta_read_us = 0, meta_max_read_us = 0, meta_min_read_us = NC_MAX_INT;
     int meta_tot_read_us = 0, meta_avg_read_us;
     int num_trials = 1;
+    char new_file[1024];
     int t;
     
     while ((c = getopt(argc, argv, "vt")) != EOF)
@@ -147,14 +149,27 @@ main(int argc, char **argv)
     {
 	/* Clear all buffers. */
 	if (timing)
-	    system("./clearcache.sh");
+	{
+	    char cmd[1024];
+	    char base_name[1024];
+	    size_t len;
 
+	    len = strlen(GLM_DATA_FILE) - 3;
+	    strncpy(base_name, GLM_DATA_FILE, len);
+	    base_name[len] = 0;
+	    sprintf(new_file, "%s_%d.nc", base_name, t);
+	    sprintf(cmd, "cp %s %s", GLM_DATA_FILE, new_file);
+	    system(cmd);
+	}
+	else
+	    strcpy(new_file, GLM_DATA_FILE);
+	
 	/* Start timer. */
 	if (gettimeofday(&start_time, NULL))
 	    ERR;
 
 	/* Read file. */
-	if (glm_read_file(GLM_DATA_FILE, verbose))
+	if (glm_read_file(new_file, verbose))
 	    ERR;
 
 	/* Handle timing. */
@@ -166,6 +181,16 @@ main(int argc, char **argv)
 	if (meta_read_us < meta_min_read_us)
 	    meta_min_read_us = meta_read_us;
 	meta_tot_read_us += meta_read_us;
+
+	if (timing)
+	{
+	    char cmd[1024];
+	    sprintf(cmd, "rm %s", new_file);
+	    system(cmd);
+	}
+	
+	/* if (verbose) */
+	    printf("meta_read_us %d\n", meta_read_us);
     }
 
     if (timing)

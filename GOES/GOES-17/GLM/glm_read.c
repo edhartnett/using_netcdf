@@ -159,7 +159,6 @@ main(int argc, char **argv)
 	    base_name[len] = 0;
 	    sprintf(new_file, "%s_%d.nc", base_name, t);
 	    sprintf(cmd, "cp %s %s", GLM_DATA_FILE, new_file);
-	    /* system("./clearcache.sh"); */
 	    system(cmd);
 	}
 	else

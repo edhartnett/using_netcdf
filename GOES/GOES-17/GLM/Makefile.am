@@ -19,7 +19,7 @@ glm_read_SOURCES = glm_read.c un_test.h tst_utils.c
 TESTS = tst_glm.sh 
 
 # Make sure this file is included in distribution.
-EXTRA_DIST = tst_glm.sh
+EXTRA_DIST = tst_glm.sh clearcache.sh
 
 # Clean data files for distclean target.
 DISTCLEANFILES = *.nc

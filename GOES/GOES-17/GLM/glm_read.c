@@ -124,6 +124,8 @@ glm_read_file(char *file_name, int verbose)
     int event_dimid, group_dimid, flash_dimid;
     int event_id_varid;
     int *event_id = NULL;
+    short *event_time_offset = NULL, *event_lat = NULL, *event_lon = NULL;
+    int event_time_offset_varid, event_lat_varid, event_lon_varid;
     int ret;
     
     /* Open the data file as read-only. */
@@ -165,13 +167,31 @@ glm_read_file(char *file_name, int verbose)
     /* Allocate storeage. */
     if (!(event_id = malloc(nevents * sizeof(int))))
 	ERR;
-
-    /* Find the varid for event_id. */
+    if (!(event_time_offset = malloc(nevents * sizeof(short))))
+	ERR;
+    if (!(event_lat = malloc(nevents * sizeof(short))))
+	ERR;
+    if (!(event_lon = malloc(nevents * sizeof(short))))
+	ERR;
+    
+    /* Find the varids. */
     if ((ret = nc_inq_varid(ncid, EVENT_ID, &event_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_TIME_OFFSET, &event_time_offset_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_LAT, &event_lat_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_LON, &event_lon_varid)))
 	NC_ERR(ret);
     
     /* Read the event ID. */
     if ((ret = nc_get_var_int(ncid, event_id_varid, event_id)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, event_time_offset_varid, event_time_offset)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, event_lat_varid, event_lat)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, event_lon_varid, event_lon)))
 	NC_ERR(ret);
     
     /* Close the data file. */
@@ -181,6 +201,12 @@ glm_read_file(char *file_name, int verbose)
     /* Free storage. */
     if (event_id)
 	free(event_id);
+    if (event_time_offset)
+	free(event_time_offset);
+    if (event_lat)
+	free(event_lat);
+    if (event_lon)
+	free(event_lon);
     
     return 0;
 }

@@ -125,7 +125,9 @@ glm_read_file(char *file_name, int verbose)
     int event_id_varid;
     int *event_id = NULL;
     short *event_time_offset = NULL, *event_lat = NULL, *event_lon = NULL;
+    short *event_energy = NULL;
     int event_time_offset_varid, event_lat_varid, event_lon_varid;
+    int event_energy_varid;
     int ret;
     
     /* Open the data file as read-only. */
@@ -183,6 +185,8 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_inq_varid(ncid, EVENT_LON, &event_lon_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_ENERGY, &event_energy_varid)))
+	NC_ERR(ret);
     
     /* Read the event ID. */
     if ((ret = nc_get_var_int(ncid, event_id_varid, event_id)))
@@ -193,6 +197,8 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_get_var_short(ncid, event_lon_varid, event_lon)))
 	NC_ERR(ret);
+    /* if ((ret = nc_get_var_short(ncid, event_energy_varid, event_energy))) */
+    /* 	NC_ERR(ret); */
     
     /* Close the data file. */
     if ((ret = nc_close(ncid)))
@@ -207,6 +213,8 @@ glm_read_file(char *file_name, int verbose)
 	free(event_lat);
     if (event_lon)
 	free(event_lon);
+    if (event_energy)
+	free(event_energy);
     
     return 0;
 }

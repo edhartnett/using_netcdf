@@ -25,6 +25,56 @@
 /* Number of timing runs. */
 #define NUM_TRIALS 10
 
+/* Variable names. */
+#define EVENT_ID "event_id"
+#define EVENT_TIME_OFFSET "event_time_offset"
+#define EVENT_LAT "event_lat"
+#define EVENT_LON "event_lon"
+#define EVENT_ENERGY "event_energy"
+#define EVENT_PARENT_GROUP_ID "event_parent_group_id"
+#define GROUP_ID "group_id"
+#define GROUP_TIME_OFFSET "group_time_offset"
+#define GROUP_FRAME_TIME_OFFSET "group_frame_time_offset"
+#define GROUP_LAT "group_lat"
+#define GROUP_LON "group_lon"
+#define GROUP_AREA "group_area"
+#define GROUP_ENERGY "group_energy"
+#define GROUP_PARENT_FLASH_ID "group_parent_flash_id"
+#define GROUP_QUALITY_FLAG "group_quality_flag"
+#define FLASH_ID "flash_id"
+#define FLASH_TIME_OFFSET_OF_FIRST_EVENT "flash_time_offset_of_first_event"
+#define FLASH_TIME_OFFSET_OF_LAST_EVENT "flash_time_offset_of_last_event"
+#define FLASH_FRAME_TIME_OFFSET_OF_FIRST_EVENT "flash_frame_time_offset_of_first_event"
+#define FLASH_FRAME_TIME_OFFSET_OF_LAST_EVENT "flash_frame_time_offset_of_last_event"
+#define FLASH_LAT "flash_lat"
+#define FLAGS_LON "flash_lon"
+#define FLASH_AREA "flash_area"
+#define FLASH_ENERGY "flash_energy"
+#define FLASH_QUALITY_FLAG "flash_quality_flag"
+#define PRODUCT_TIME "product_time"
+#define PRODUCT_TIME_BOUNDS "product_time_bounds"
+#define LIGHTNING_WAVELENGTH "lightning_wavelength"
+#define LIGHTNING_WAVELENGTH_BOUNDS "lightning_wavelength_bounds"
+#define GROUP_TIME_THRESHOLD "group_time_threshold"
+#define FLASH_TIME_THRESHOLD "flash_time_threshold"
+#define LAT_FIELD_OF_VIEW "lat_field_of_view"
+#define LAT_FIELD_OF_VIEW_BOUNDS "lat_field_of_view_bounds"
+#define LAT_FIELD_OF_VIEW_BOUNDS "lat_field_of_view_bounds"
+#define EVENT_COUNT "event_count"
+#define GROUP_COUNT "group_count"
+#define FLASH_COUNT "flash_count"
+#define PERCENT_NAVIGATED_L1B_EVENTS "percent_navigated_L1b_events"
+#define YAW_FLIP_FLAG "yaw_flip_flag"
+#define NOMINAL_SATELLITE_SUBPOINT_LAT "nominal_satellite_subpoint_lat"
+#define NOMINAL_SATELLITE_HEIGHT "nominal_satellite_height"
+#define NOMINAL_SATELLITE_SUBPOINT_LON "nominal_satellite_subpoint_lon"
+#define LON_FIELD_OF_VIEW "lon_field_of_view"
+#define LON_FIELD_OF_VIEW_BOUNDS "lon_field_of_view_bounds"
+#define PERCENT_UNCORRECTABLE_L0_ERRORS "percent_uncorrectable_L0_errors"
+#define ALGORITHM_DYNAMIC_INPUT_DATA_CONTAINER "algorithm_dynamic_input_data_container"
+#define PROCESSING_PARM_VERSION_CONTAINER "processing_parm_version_container"
+#define ALGORITHM_PRODUCT_VERSION_CONTAINER "algorithm_product_version_container"
+
 /* These are dimension names in the GLM data file. */
 #define NUMBER_OF_FLASHES "number_of_flashes"
 #define NUMBER_OF_GROUPS "number_of_groups"
@@ -72,6 +122,12 @@ glm_read_file(char *file_name, int verbose)
     int ncid;
     size_t nevents, ngroups, nflashes;
     int event_dimid, group_dimid, flash_dimid;
+    int event_id_varid;
+    int *event_id = NULL;
+    short *event_time_offset = NULL, *event_lat = NULL, *event_lon = NULL;
+    short *event_energy = NULL;
+    int event_time_offset_varid, event_lat_varid, event_lon_varid;
+    int event_energy_varid;
     int ret;
     
     /* Open the data file as read-only. */
@@ -106,10 +162,59 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_inq_dimlen(ncid, event_dimid, &nevents)))
 	NC_ERR(ret);
+    if (verbose)
+	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
+	       ngroups, nevents);
 
+    /* Allocate storeage. */
+    if (!(event_id = malloc(nevents * sizeof(int))))
+	ERR;
+    if (!(event_time_offset = malloc(nevents * sizeof(short))))
+	ERR;
+    if (!(event_lat = malloc(nevents * sizeof(short))))
+	ERR;
+    if (!(event_lon = malloc(nevents * sizeof(short))))
+	ERR;
+    
+    /* Find the varids. */
+    if ((ret = nc_inq_varid(ncid, EVENT_ID, &event_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_TIME_OFFSET, &event_time_offset_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_LAT, &event_lat_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_LON, &event_lon_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_ENERGY, &event_energy_varid)))
+	NC_ERR(ret);
+    
+    /* Read the event ID. */
+    if ((ret = nc_get_var_int(ncid, event_id_varid, event_id)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, event_time_offset_varid, event_time_offset)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, event_lat_varid, event_lat)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, event_lon_varid, event_lon)))
+	NC_ERR(ret);
+    /* if ((ret = nc_get_var_short(ncid, event_energy_varid, event_energy))) */
+    /* 	NC_ERR(ret); */
+    
     /* Close the data file. */
     if ((ret = nc_close(ncid)))
 	NC_ERR(ret);
+
+    /* Free storage. */
+    if (event_id)
+	free(event_id);
+    if (event_time_offset)
+	free(event_time_offset);
+    if (event_lat)
+	free(event_lat);
+    if (event_lon)
+	free(event_lon);
+    if (event_energy)
+	free(event_energy);
     
     return 0;
 }

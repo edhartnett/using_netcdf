@@ -123,10 +123,20 @@ glm_read_file(char *file_name, int verbose)
     size_t nevents, ngroups, nflashes;
     int event_dimid, group_dimid, flash_dimid;
     int event_id_varid;
+    int group_id_varid, group_time_offset_varid;
+    int group_frame_time_offset_varid, group_lat_varid, group_lon_varid;
+    int group_area_varid, group_energy_varid, group_parent_flash_id_varid;
+    int group_quality_flag_varid;
     int *event_id = NULL;
     short *event_time_offset = NULL, *event_lat = NULL, *event_lon = NULL;
     short *event_energy = NULL;
-    int *event_parent_group_id = NULL;
+    int *event_parent_group_id = NULL; 
+    int *group_id = NULL;
+    short *group_time_offset = NULL;
+    short *group_frame_time_offset = NULL;
+    float *group_lat = NULL, *group_lon = NULL;
+    short *group_area = NULL, *group_energy = NULL, *group_parent_flash_id = NULL;
+    short *group_quality_flag = NULL;
     int event_time_offset_varid, event_lat_varid, event_lon_varid;
     int event_energy_varid, event_parent_group_id_varid;
     int ret;
@@ -181,7 +191,7 @@ glm_read_file(char *file_name, int verbose)
     if (!(event_parent_group_id = malloc(nevents * sizeof(int))))
 	ERR;
     
-    /* Find the varids. */
+    /* Find the varids for the event variables. */
     if ((ret = nc_inq_varid(ncid, EVENT_ID, &event_id_varid)))
 	NC_ERR(ret);
     if ((ret = nc_inq_varid(ncid, EVENT_TIME_OFFSET, &event_time_offset_varid)))
@@ -195,7 +205,11 @@ glm_read_file(char *file_name, int verbose)
     if ((ret = nc_inq_varid(ncid, EVENT_ENERGY, &event_parent_group_id_varid)))
 	NC_ERR(ret);
     
-    /* Read the event ID. */
+    /* Find the varids for the group variables. */
+    if ((ret = nc_inq_varid(ncid, GROUP_ID, &group_id_varid)))
+	NC_ERR(ret);
+
+    /* Read the event variables. */
     if ((ret = nc_get_var_int(ncid, event_id_varid, event_id)))
 	NC_ERR(ret);
     if ((ret = nc_get_var_short(ncid, event_time_offset_varid, event_time_offset)))
@@ -208,6 +222,8 @@ glm_read_file(char *file_name, int verbose)
     	NC_ERR(ret);
     if ((ret = nc_get_var_int(ncid, event_parent_group_id_varid, event_parent_group_id)))
     	NC_ERR(ret);
+
+    /* Read the group variables. */
     
     /* Close the data file. */
     if ((ret = nc_close(ncid)))
@@ -226,7 +242,25 @@ glm_read_file(char *file_name, int verbose)
 	free(event_energy);
     if (event_parent_group_id)
 	free(event_parent_group_id);
-    
+    if (group_id)
+	free(group_id);
+    if (group_time_offset)
+	free(group_time_offset);
+    if (group_frame_time_offset)
+	free(group_frame_time_offset);
+    if (group_lat)
+	free(group_lat);
+    if (group_lon)
+	free(group_lon);
+    if (group_area)
+	free(group_area);
+    if (group_energy)
+	free(group_energy);
+    if (group_parent_flash_id)
+	free(group_parent_flash_id);
+    if (group_quality_flag)
+	free(group_quality_flag);
+
     return 0;
 }
 

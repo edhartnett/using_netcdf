@@ -120,10 +120,10 @@ int
 glm_read_file(char *file_name, int verbose)
 {
     int ncid;
+    int event_dimid, group_dimid, flash_dimid;
     size_t nevents, ngroups, nflashes;
 
     /* Events. */
-    int event_dimid, group_dimid, flash_dimid;
     int event_id_varid;
     int event_time_offset_varid, event_lat_varid, event_lon_varid;
     int event_energy_varid, event_parent_group_id_varid;
@@ -144,7 +144,8 @@ glm_read_file(char *file_name, int verbose)
     short *group_area = NULL, *group_energy = NULL, *group_parent_flash_id = NULL;
     short *group_quality_flag = NULL;
 
-    /* Flashes. */
+    /* Flashes. Note that event_id and group_id are int, but flash_id
+     * is short. */
     int flash_id_varid;
     int flash_time_offset_of_first_event_varid;
     int flash_time_offset_of_last_event_varid;
@@ -346,6 +347,32 @@ glm_read_file(char *file_name, int verbose)
     if ((ret = nc_get_var_short(ncid, group_parent_flash_id_varid, group_parent_flash_id)))
     	NC_ERR(ret);
     if ((ret = nc_get_var_short(ncid, group_quality_flag_varid, group_quality_flag)))
+    	NC_ERR(ret);
+
+    /* Read the flash variables. */
+    if ((ret = nc_get_var_short(ncid, flash_id_varid, flash_id)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_time_offset_of_first_event_varid,
+				flash_time_offset_of_first_event)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_time_offset_of_last_event_varid,
+				flash_time_offset_of_last_event)))
+	NC_ERR(ret); 
+    if ((ret = nc_get_var_short(ncid, flash_frame_time_offset_of_first_event_varid,
+				flash_frame_time_offset_of_first_event)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_frame_time_offset_of_last_event_varid,
+				flash_frame_time_offset_of_last_event)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, flash_lat_varid, flash_lat)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, flash_lon_varid, flash_lon)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_area_varid, flash_area)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_energy_varid, flash_energy)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_quality_flag_varid, flash_quality_flag)))
     	NC_ERR(ret);
     
     /* Close the data file. */

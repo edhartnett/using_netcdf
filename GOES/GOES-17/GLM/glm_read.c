@@ -14,6 +14,7 @@
 #include <time.h>
 #include <sys/time.h> /* Extra high precision time info. */
 #include <math.h>
+#include <assert.h>
 #include <netcdf.h>
 #include "un_test.h"
 
@@ -211,16 +212,19 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_inq_dimlen(ncid, number_of_time_bounds_dimid, &ntime_bounds)))
 	NC_ERR(ret);
+    assert(ntime_bounds == 2);
 
     if ((ret = nc_inq_dimid(ncid, NUMBER_OF_FIELD_OF_VIEW_BOUNDS, &number_of_field_of_view_bounds_dimid)))
 	NC_ERR(ret);
     if ((ret = nc_inq_dimlen(ncid, number_of_field_of_view_bounds_dimid, &nfov_bounds)))
 	NC_ERR(ret);
+    assert(nfov_bounds == 2);
 
     if ((ret = nc_inq_dimid(ncid, NUMBER_OF_WAVELENGTH_BOUNDS, &number_of_wavelength_bounds_dimid)))
 	NC_ERR(ret);
     if ((ret = nc_inq_dimlen(ncid, number_of_wavelength_bounds_dimid, &nwl_bounds)))
 	NC_ERR(ret);
+    assert(nwl_bounds == 2);
 
     if (verbose)
 	printf("nflashes %d ngroups %d nevents %d\n", nflashes,

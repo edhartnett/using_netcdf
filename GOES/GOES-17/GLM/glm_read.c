@@ -566,6 +566,27 @@ glm_read_file(char *file_name, int verbose)
 			      &algorithm_dynamic_input_data_container)))
     	NC_ERR(ret);
 
+    if ((ret = nc_inq_varid(ncid, PROCESSING_PARM_VERSION_CONTAINER,
+			    &processing_parm_version_container_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, processing_parm_version_container_varid,
+			      &processing_parm_version_container)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, PROCESSING_PARM_VERSION_CONTAINER,
+			    &processing_parm_version_container_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, processing_parm_version_container_varid,
+			      &processing_parm_version_container)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, ALGORITHM_PRODUCT_VERSION_CONTAINER,
+			    &algorithm_product_version_container_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, algorithm_product_version_container_varid,
+			      &algorithm_product_version_container)))
+    	NC_ERR(ret);
+
 
     /* Close the data file. */
     if ((ret = nc_close(ncid)))

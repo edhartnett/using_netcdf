@@ -205,15 +205,15 @@ glm_read_file(char *file_name, int verbose)
 	ERR;
     if (!(group_frame_time_offset = malloc(ngroups * sizeof(short))))
 	ERR;
-    if (!(group_lat = malloc(ngroups * sizeof(short))))
+    if (!(group_lat = malloc(ngroups * sizeof(float))))
 	ERR;
-    if (!(group_lon = malloc(ngroups * sizeof(short))))
+    if (!(group_lon = malloc(ngroups * sizeof(float))))
 	ERR;
     if (!(group_area = malloc(ngroups * sizeof(short))))
 	ERR;
     if (!(group_energy = malloc(ngroups * sizeof(short))))
 	ERR;
-    if (!(group_parent_flash_id = malloc(ngroups * sizeof(int))))
+    if (!(group_parent_flash_id = malloc(ngroups * sizeof(short))))
 	ERR;
     if (!(group_quality_flag = malloc(ngroups * sizeof(int))))
 	ERR;
@@ -273,15 +273,15 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_get_var_short(ncid, group_frame_time_offset_varid, group_frame_time_offset)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, group_lat_varid, group_lat)))
+    if ((ret = nc_get_var_float(ncid, group_lat_varid, group_lat)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, group_lon_varid, group_lon)))
+    if ((ret = nc_get_var_float(ncid, group_lon_varid, group_lon)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, group_area_varid, area_energy)))
+    if ((ret = nc_get_var_short(ncid, group_area_varid, group_area)))
     	NC_ERR(ret);
     if ((ret = nc_get_var_short(ncid, group_energy_varid, group_energy)))
     	NC_ERR(ret);
-    if ((ret = nc_get_var_int(ncid, group_parent_flash_id_varid, group_parent_flash_id)))
+    if ((ret = nc_get_var_short(ncid, group_parent_flash_id_varid, group_parent_flash_id)))
     	NC_ERR(ret);
     
     /* Close the data file. */

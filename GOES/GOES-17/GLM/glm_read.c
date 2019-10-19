@@ -14,6 +14,7 @@
 #include <time.h>
 #include <sys/time.h> /* Extra high precision time info. */
 #include <math.h>
+#include <assert.h>
 #include <netcdf.h>
 #include "un_test.h"
 
@@ -22,8 +23,21 @@
 #define SUMMARY "summary"
 #define PLATFORM_ID "platform_ID"
 
-/* Number of timing runs. */
+/* Number of timing runs when -t option is used. */
 #define NUM_TRIALS 10
+
+/* The three dimensions number_of_time_bounds,
+ * number_of_field_of_view_bounds, number_of_wavelength_bounds have
+ * a length of 2. */
+#define EXTRA_DIM_LEN 2
+
+/* These are dimension names in the GLM data file. */
+#define NUMBER_OF_FLASHES "number_of_flashes"
+#define NUMBER_OF_GROUPS "number_of_groups"
+#define NUMBER_OF_EVENTS "number_of_events"
+#define NUMBER_OF_TIME_BOUNDS "number_of_time_bounds"
+#define NUMBER_OF_FIELD_OF_VIEW_BOUNDS "number_of_field_of_view_bounds"
+#define NUMBER_OF_WAVELENGTH_BOUNDS "number_of_wavelength_bounds"
 
 /* Variable names. */
 #define EVENT_ID "event_id"
@@ -47,7 +61,7 @@
 #define FLASH_FRAME_TIME_OFFSET_OF_FIRST_EVENT "flash_frame_time_offset_of_first_event"
 #define FLASH_FRAME_TIME_OFFSET_OF_LAST_EVENT "flash_frame_time_offset_of_last_event"
 #define FLASH_LAT "flash_lat"
-#define FLAGS_LON "flash_lon"
+#define FLASH_LON "flash_lon"
 #define FLASH_AREA "flash_area"
 #define FLASH_ENERGY "flash_energy"
 #define FLASH_QUALITY_FLAG "flash_quality_flag"
@@ -59,7 +73,7 @@
 #define FLASH_TIME_THRESHOLD "flash_time_threshold"
 #define LAT_FIELD_OF_VIEW "lat_field_of_view"
 #define LAT_FIELD_OF_VIEW_BOUNDS "lat_field_of_view_bounds"
-#define LAT_FIELD_OF_VIEW_BOUNDS "lat_field_of_view_bounds"
+#define GOES_LAT_LON_PROJECTION "goes_lat_lon_projection"
 #define EVENT_COUNT "event_count"
 #define GROUP_COUNT "group_count"
 #define FLASH_COUNT "flash_count"
@@ -74,11 +88,6 @@
 #define ALGORITHM_DYNAMIC_INPUT_DATA_CONTAINER "algorithm_dynamic_input_data_container"
 #define PROCESSING_PARM_VERSION_CONTAINER "processing_parm_version_container"
 #define ALGORITHM_PRODUCT_VERSION_CONTAINER "algorithm_product_version_container"
-
-/* These are dimension names in the GLM data file. */
-#define NUMBER_OF_FLASHES "number_of_flashes"
-#define NUMBER_OF_GROUPS "number_of_groups"
-#define NUMBER_OF_EVENTS "number_of_events"
 
 /* Usage description. */
 #define USAGE   "\
@@ -120,14 +129,55 @@ int
 glm_read_file(char *file_name, int verbose)
 {
     int ncid;
-    size_t nevents, ngroups, nflashes;
+
+    /* Dimensions and their lengths. */
     int event_dimid, group_dimid, flash_dimid;
+    int number_of_time_bounds_dimid;
+    int number_of_field_of_view_bounds_dimid;
+    int number_of_wavelength_bounds_dimid;
+    size_t nevents, ngroups, nflashes;
+    size_t ntime_bounds, nfov_bounds, nwl_bounds;
+
+    /* Events. */
     int event_id_varid;
+    int event_time_offset_varid, event_lat_varid, event_lon_varid;
+    int event_energy_varid, event_parent_group_id_varid;
     int *event_id = NULL;
     short *event_time_offset = NULL, *event_lat = NULL, *event_lon = NULL;
     short *event_energy = NULL;
-    int event_time_offset_varid, event_lat_varid, event_lon_varid;
-    int event_energy_varid;
+    int *event_parent_group_id = NULL; 
+
+    /* Groups. */
+    int group_id_varid, group_time_offset_varid;
+    int group_frame_time_offset_varid, group_lat_varid, group_lon_varid;
+    int group_area_varid, group_energy_varid, group_parent_flash_id_varid;
+    int group_quality_flag_varid;
+    int *group_id = NULL;
+    short *group_time_offset = NULL;
+    short *group_frame_time_offset = NULL;
+    float *group_lat = NULL, *group_lon = NULL;
+    short *group_area = NULL, *group_energy = NULL, *group_parent_flash_id = NULL;
+    short *group_quality_flag = NULL;
+
+    /* Flashes. Note that event_id and group_id are int, but flash_id
+     * is short. */
+    int flash_id_varid;
+    int flash_time_offset_of_first_event_varid;
+    int flash_time_offset_of_last_event_varid;
+    int flash_frame_time_offset_of_first_event_varid;
+    int flash_frame_time_offset_of_last_event_varid;
+    int flash_lat_varid, flash_lon_varid;
+    int flash_area_varid, flash_energy_varid;
+    int flash_quality_flag_varid;
+    short *flash_id = NULL;
+    short *flash_time_offset_of_first_event = NULL;
+    short *flash_time_offset_of_last_event = NULL;
+    short *flash_frame_time_offset_of_first_event = NULL;
+    short *flash_frame_time_offset_of_last_event = NULL;
+    float *flash_lat = NULL, *flash_lon = NULL;
+    short *flash_area = NULL, *flash_energy = NULL;
+    short *flash_quality_flag = NULL;
+
     int ret;
     
     /* Open the data file as read-only. */
@@ -162,11 +212,30 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_inq_dimlen(ncid, event_dimid, &nevents)))
 	NC_ERR(ret);
+
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_TIME_BOUNDS, &number_of_time_bounds_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, number_of_time_bounds_dimid, &ntime_bounds)))
+	NC_ERR(ret);
+    assert(ntime_bounds == EXTRA_DIM_LEN);
+
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_FIELD_OF_VIEW_BOUNDS, &number_of_field_of_view_bounds_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, number_of_field_of_view_bounds_dimid, &nfov_bounds)))
+	NC_ERR(ret);
+    assert(nfov_bounds == EXTRA_DIM_LEN);
+
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_WAVELENGTH_BOUNDS, &number_of_wavelength_bounds_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, number_of_wavelength_bounds_dimid, &nwl_bounds)))
+	NC_ERR(ret);
+    assert(nwl_bounds == EXTRA_DIM_LEN);
+
     if (verbose)
 	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
 	       ngroups, nevents);
 
-    /* Allocate storeage. */
+    /* Allocate storeage for event variables. */
     if (!(event_id = malloc(nevents * sizeof(int))))
 	ERR;
     if (!(event_time_offset = malloc(nevents * sizeof(short))))
@@ -175,8 +244,54 @@ glm_read_file(char *file_name, int verbose)
 	ERR;
     if (!(event_lon = malloc(nevents * sizeof(short))))
 	ERR;
-    
-    /* Find the varids. */
+    if (!(event_energy = malloc(nevents * sizeof(short))))
+	ERR;
+    if (!(event_parent_group_id = malloc(nevents * sizeof(int))))
+	ERR;
+
+    /* Allocate storeage for group variables. */
+    if (!(group_id = malloc(ngroups * sizeof(int))))
+	ERR;
+    if (!(group_time_offset = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_frame_time_offset = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_lat = malloc(ngroups * sizeof(float))))
+	ERR;
+    if (!(group_lon = malloc(ngroups * sizeof(float))))
+	ERR;
+    if (!(group_area = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_energy = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_parent_flash_id = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_quality_flag = malloc(ngroups * sizeof(int))))
+	ERR;
+
+        /* Allocate storeage for flash variables. */
+    if (!(flash_id = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_time_offset_of_first_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_time_offset_of_last_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_frame_time_offset_of_first_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_frame_time_offset_of_last_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_lat = malloc(nflashes * sizeof(float))))
+	ERR;
+    if (!(flash_lon = malloc(nflashes * sizeof(float))))
+	ERR;
+    if (!(flash_area = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_energy = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_quality_flag = malloc(nflashes * sizeof(short))))
+	ERR;
+
+    /* Find the varids for the event variables. */
     if ((ret = nc_inq_varid(ncid, EVENT_ID, &event_id_varid)))
 	NC_ERR(ret);
     if ((ret = nc_inq_varid(ncid, EVENT_TIME_OFFSET, &event_time_offset_varid)))
@@ -187,8 +302,54 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_inq_varid(ncid, EVENT_ENERGY, &event_energy_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_PARENT_GROUP_ID, &event_parent_group_id_varid)))
+	NC_ERR(ret);
     
-    /* Read the event ID. */
+    /* Find the varids for the group variables. */
+    if ((ret = nc_inq_varid(ncid, GROUP_ID, &group_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_TIME_OFFSET, &group_time_offset_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_FRAME_TIME_OFFSET, &group_frame_time_offset_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_LAT, &group_lat_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_LON, &group_lon_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_AREA, &group_area_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_ENERGY, &group_energy_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_PARENT_FLASH_ID, &group_parent_flash_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_QUALITY_FLAG, &group_quality_flag_varid)))
+	NC_ERR(ret);
+
+        /* Find the varids for the flash variables. */
+    if ((ret = nc_inq_varid(ncid, FLASH_ID, &flash_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_TIME_OFFSET_OF_FIRST_EVENT, &flash_time_offset_of_first_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_TIME_OFFSET_OF_LAST_EVENT, &flash_time_offset_of_last_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_FRAME_TIME_OFFSET_OF_FIRST_EVENT,
+			    &flash_frame_time_offset_of_first_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_FRAME_TIME_OFFSET_OF_LAST_EVENT,
+			    &flash_frame_time_offset_of_last_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_LAT, &flash_lat_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_LON, &flash_lon_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_AREA, &flash_area_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_ENERGY, &flash_energy_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_QUALITY_FLAG, &flash_quality_flag_varid)))
+	NC_ERR(ret);
+
+    /* Read the event variables. */
     if ((ret = nc_get_var_int(ncid, event_id_varid, event_id)))
 	NC_ERR(ret);
     if ((ret = nc_get_var_short(ncid, event_time_offset_varid, event_time_offset)))
@@ -197,14 +358,241 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_get_var_short(ncid, event_lon_varid, event_lon)))
 	NC_ERR(ret);
-    /* if ((ret = nc_get_var_short(ncid, event_energy_varid, event_energy))) */
-    /* 	NC_ERR(ret); */
+    if ((ret = nc_get_var_short(ncid, event_energy_varid, event_energy)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, event_parent_group_id_varid, event_parent_group_id)))
+    	NC_ERR(ret);
+
+    /* Read the group variables. */
+    if ((ret = nc_get_var_int(ncid, group_id_varid, group_id)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_time_offset_varid, group_time_offset)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_frame_time_offset_varid, group_frame_time_offset)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, group_lat_varid, group_lat)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, group_lon_varid, group_lon)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_area_varid, group_area)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_energy_varid, group_energy)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_parent_flash_id_varid, group_parent_flash_id)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_quality_flag_varid, group_quality_flag)))
+    	NC_ERR(ret);
+
+    /* Read the flash variables. */
+    if ((ret = nc_get_var_short(ncid, flash_id_varid, flash_id)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_time_offset_of_first_event_varid,
+				flash_time_offset_of_first_event)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_time_offset_of_last_event_varid,
+				flash_time_offset_of_last_event)))
+	NC_ERR(ret); 
+    if ((ret = nc_get_var_short(ncid, flash_frame_time_offset_of_first_event_varid,
+				flash_frame_time_offset_of_first_event)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_frame_time_offset_of_last_event_varid,
+				flash_frame_time_offset_of_last_event)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, flash_lat_varid, flash_lat)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, flash_lon_varid, flash_lon)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_area_varid, flash_area)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_energy_varid, flash_energy)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_quality_flag_varid, flash_quality_flag)))
+    	NC_ERR(ret);
+
+    int product_time_varid;
+    double product_time;
+    int product_time_bounds_varid;
+    double product_time_bounds[EXTRA_DIM_LEN];
+    int lightning_wavelength_varid;
+    float lightning_wavelength;
+    int lightning_wavelength_bounds_varid;
+    float lightning_wavelength_bounds[EXTRA_DIM_LEN];
+    int group_time_threshold_varid;
+    float group_time_threshold;
+    int flash_time_threshold_varid;
+    float flash_time_threshold;
+    int lat_field_of_view_varid;
+    float lat_field_of_view;
+    int lat_field_of_view_bounds_varid;
+    float lat_field_of_view_bounds[EXTRA_DIM_LEN];
+    int goes_lat_lon_projection_varid;
+    int goes_lat_lon_projection;
+    int event_count_varid;
+    int event_count;
+    int group_count_varid;
+    int group_count;
+    int flash_count_varid;
+    int flash_count;
+    int percent_navigated_L1b_events_varid;
+    float percent_navigated_L1b_events;
+    int yaw_flip_flag_varid;
+    signed char yaw_flip_flag;
+    int nominal_satellite_subpoint_lat_varid;
+    float nominal_satellite_subpoint_lat;
+    int nominal_satellite_height_varid;
+    float nominal_satellite_height;
+    int nominal_satellite_subpoint_lon_varid;
+    float nominal_satellite_subpoint_lon;
+    int lon_field_of_view_varid;
+    float lon_field_of_view;
+    int lon_field_of_view_bounds_varid;
+    float lon_field_of_view_bounds[EXTRA_DIM_LEN];
+    int percent_uncorrectable_L0_errors_varid;
+    float percent_uncorrectable_L0_errors;
+    int algorithm_dynamic_input_data_container_varid;
+    int algorithm_dynamic_input_data_container;
+    int processing_parm_version_container_varid;
+    int processing_parm_version_container;
+    int algorithm_product_version_container_varid;
+    int algorithm_product_version_container;
+
+    /* Get varids and values of scalars and small vars. */
+    if ((ret = nc_inq_varid(ncid, PRODUCT_TIME, &product_time_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_double(ncid, product_time_varid, &product_time)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, PRODUCT_TIME_BOUNDS, &product_time_bounds_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_double(ncid, product_time_bounds_varid, product_time_bounds)))
+    	NC_ERR(ret);
     
+    if ((ret = nc_inq_varid(ncid, LIGHTNING_WAVELENGTH, &lightning_wavelength_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, lightning_wavelength_varid, &lightning_wavelength)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, LIGHTNING_WAVELENGTH_BOUNDS, &lightning_wavelength_bounds_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, lightning_wavelength_bounds_varid, lightning_wavelength_bounds)))
+    	NC_ERR(ret);
+    
+    if ((ret = nc_inq_varid(ncid, GROUP_TIME_THRESHOLD, &group_time_threshold_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, group_time_threshold_varid, &group_time_threshold)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, FLASH_TIME_THRESHOLD, &flash_time_threshold_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, flash_time_threshold_varid, &flash_time_threshold)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, LAT_FIELD_OF_VIEW, &lat_field_of_view_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, lat_field_of_view_varid, &lat_field_of_view)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, LAT_FIELD_OF_VIEW_BOUNDS, &lat_field_of_view_bounds_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, lat_field_of_view_bounds_varid, lat_field_of_view_bounds)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, GOES_LAT_LON_PROJECTION, &goes_lat_lon_projection_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, goes_lat_lon_projection_varid, &goes_lat_lon_projection)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, EVENT_COUNT, &event_count_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, event_count_varid, &event_count)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, GROUP_COUNT, &group_count_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, group_count_varid, &group_count)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, FLASH_COUNT, &flash_count_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, flash_count_varid, &flash_count)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, PERCENT_NAVIGATED_L1B_EVENTS, &percent_navigated_L1b_events_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, percent_navigated_L1b_events_varid, &percent_navigated_L1b_events)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, YAW_FLIP_FLAG, &yaw_flip_flag_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_schar(ncid, yaw_flip_flag_varid, &yaw_flip_flag)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, NOMINAL_SATELLITE_SUBPOINT_LAT, &nominal_satellite_subpoint_lat_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, nominal_satellite_subpoint_lat_varid, &nominal_satellite_subpoint_lat)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, NOMINAL_SATELLITE_HEIGHT, &nominal_satellite_height_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, nominal_satellite_height_varid, &nominal_satellite_height)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, NOMINAL_SATELLITE_SUBPOINT_LON, &nominal_satellite_subpoint_lon_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, nominal_satellite_subpoint_lon_varid, &nominal_satellite_subpoint_lon)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, LON_FIELD_OF_VIEW, &lon_field_of_view_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, lon_field_of_view_varid, &lon_field_of_view)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, LON_FIELD_OF_VIEW_BOUNDS, &lon_field_of_view_bounds_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, lon_field_of_view_bounds_varid, lon_field_of_view_bounds)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, PERCENT_UNCORRECTABLE_L0_ERRORS,
+			    &percent_uncorrectable_L0_errors_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, percent_uncorrectable_L0_errors_varid,
+				&percent_uncorrectable_L0_errors)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, ALGORITHM_DYNAMIC_INPUT_DATA_CONTAINER,
+			    &algorithm_dynamic_input_data_container_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, algorithm_dynamic_input_data_container_varid,
+			      &algorithm_dynamic_input_data_container)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, PROCESSING_PARM_VERSION_CONTAINER,
+			    &processing_parm_version_container_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, processing_parm_version_container_varid,
+			      &processing_parm_version_container)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, PROCESSING_PARM_VERSION_CONTAINER,
+			    &processing_parm_version_container_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, processing_parm_version_container_varid,
+			      &processing_parm_version_container)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, ALGORITHM_PRODUCT_VERSION_CONTAINER,
+			    &algorithm_product_version_container_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, algorithm_product_version_container_varid,
+			      &algorithm_product_version_container)))
+    	NC_ERR(ret);
+
+
     /* Close the data file. */
     if ((ret = nc_close(ncid)))
 	NC_ERR(ret);
 
-    /* Free storage. */
+    /* Free event storage. */
     if (event_id)
 	free(event_id);
     if (event_time_offset)
@@ -215,7 +603,51 @@ glm_read_file(char *file_name, int verbose)
 	free(event_lon);
     if (event_energy)
 	free(event_energy);
-    
+    if (event_parent_group_id)
+	free(event_parent_group_id);
+
+    /* Free group storage. */
+    if (group_id)
+	free(group_id);
+    if (group_time_offset)
+	free(group_time_offset);
+    if (group_frame_time_offset)
+	free(group_frame_time_offset);
+    if (group_lat)
+	free(group_lat);
+    if (group_lon)
+	free(group_lon);
+    if (group_area)
+	free(group_area);
+    if (group_energy)
+	free(group_energy);
+    if (group_parent_flash_id)
+	free(group_parent_flash_id);
+    if (group_quality_flag)
+	free(group_quality_flag);
+
+    /* Free flash storage. */
+    if (flash_id)
+	free(flash_id);
+    if (flash_time_offset_of_first_event)
+	free(flash_time_offset_of_first_event);
+    if (flash_time_offset_of_last_event)
+	free(flash_time_offset_of_last_event);
+    if (flash_frame_time_offset_of_first_event)
+	free(flash_frame_time_offset_of_first_event);
+    if (flash_frame_time_offset_of_last_event)
+	free(flash_frame_time_offset_of_last_event);
+    if (flash_lat)
+	free(flash_lat);
+    if (flash_lon)
+	free(flash_lon);
+    if (flash_area)
+	free(flash_area);
+    if (flash_energy)
+	free(flash_energy);
+    if (flash_quality_flag)
+	free(flash_quality_flag);
+
     return 0;
 }
 

@@ -214,7 +214,7 @@ glm_read_file(char *file_name, int verbose)
     if (!(event_parent_group_id = malloc(nevents * sizeof(int))))
 	ERR;
 
-        /* Allocate storeage for group variables. */
+    /* Allocate storeage for group variables. */
     if (!(group_id = malloc(ngroups * sizeof(int))))
 	ERR;
     if (!(group_time_offset = malloc(ngroups * sizeof(short))))
@@ -232,6 +232,28 @@ glm_read_file(char *file_name, int verbose)
     if (!(group_parent_flash_id = malloc(ngroups * sizeof(short))))
 	ERR;
     if (!(group_quality_flag = malloc(ngroups * sizeof(int))))
+	ERR;
+
+        /* Allocate storeage for flash variables. */
+    if (!(flash_id = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_time_offset_of_first_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_time_offset_of_last_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_frame_time_offset_of_first_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_frame_time_offset_of_last_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_lat = malloc(nflashes * sizeof(float))))
+	ERR;
+    if (!(flash_lon = malloc(nflashes * sizeof(float))))
+	ERR;
+    if (!(flash_area = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_energy = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_quality_flag = malloc(nflashes * sizeof(short))))
 	ERR;
 
     /* Find the varids for the event variables. */

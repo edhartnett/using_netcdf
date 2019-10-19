@@ -22,8 +22,16 @@
 #define SUMMARY "summary"
 #define PLATFORM_ID "platform_ID"
 
-/* Number of timing runs. */
+/* Number of timing runs when -t option is used. */
 #define NUM_TRIALS 10
+
+/* These are dimension names in the GLM data file. */
+#define NUMBER_OF_FLASHES "number_of_flashes"
+#define NUMBER_OF_GROUPS "number_of_groups"
+#define NUMBER_OF_EVENTS "number_of_events"
+#define NUMBER_OF_TIME_BOUNDS "number_of_time_bounds"
+#define NUMBER_OF_FIELD_OF_VIEW_BOUNDS "number_of_field_of_view_bounds"
+#define NUMBER_OF_WAVELENGTH_BOUNDS "number_of_wavelength_bounds"
 
 /* Variable names. */
 #define EVENT_ID "event_id"
@@ -75,11 +83,6 @@
 #define PROCESSING_PARM_VERSION_CONTAINER "processing_parm_version_container"
 #define ALGORITHM_PRODUCT_VERSION_CONTAINER "algorithm_product_version_container"
 
-/* These are dimension names in the GLM data file. */
-#define NUMBER_OF_FLASHES "number_of_flashes"
-#define NUMBER_OF_GROUPS "number_of_groups"
-#define NUMBER_OF_EVENTS "number_of_events"
-
 /* Usage description. */
 #define USAGE   "\
   [-v]        Verbose\n\
@@ -120,8 +123,14 @@ int
 glm_read_file(char *file_name, int verbose)
 {
     int ncid;
+
+    /* Dimensions and their lengths. */
     int event_dimid, group_dimid, flash_dimid;
+    int number_of_time_bounds_dimid;
+    int number_of_field_of_view_bounds_dimid;
+    int number_of_wavelength_bounds_dimid;
     size_t nevents, ngroups, nflashes;
+    size_t ntime_bounds, nfov_bounds, nwl_bounds;
 
     /* Events. */
     int event_id_varid;
@@ -197,6 +206,22 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_inq_dimlen(ncid, event_dimid, &nevents)))
 	NC_ERR(ret);
+
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_TIME_BOUNDS, &number_of_time_bounds_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, number_of_time_bounds_dimid, &ntime_bounds)))
+	NC_ERR(ret);
+
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_FIELD_OF_VIEW_BOUNDS, &number_of_field_of_view_bounds_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, number_of_field_of_view_bounds_dimid, &nfov_bounds)))
+	NC_ERR(ret);
+
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_WAVELENGTH_BOUNDS, &number_of_wavelength_bounds_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, number_of_wavelength_bounds_dimid, &nwl_bounds)))
+	NC_ERR(ret);
+
     if (verbose)
 	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
 	       ngroups, nevents);

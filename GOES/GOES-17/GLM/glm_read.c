@@ -374,6 +374,17 @@ glm_read_file(char *file_name, int verbose)
     	NC_ERR(ret);
     if ((ret = nc_get_var_short(ncid, flash_quality_flag_varid, flash_quality_flag)))
     	NC_ERR(ret);
+
+    double product_time;
+    int product_time_varid;;
+
+    /* Read scalars. */
+    if ((ret = nc_inq_varid(ncid, PRODUCT_TIME, &product_time_varid)))
+	NC_ERR(ret);
+
+    /* Read scalars. */
+    if ((ret = nc_get_var_double(ncid, product_time_varid, &product_time)))
+    	NC_ERR(ret);
     
     /* Close the data file. */
     if ((ret = nc_close(ncid)))

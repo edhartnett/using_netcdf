@@ -121,24 +121,31 @@ glm_read_file(char *file_name, int verbose)
 {
     int ncid;
     size_t nevents, ngroups, nflashes;
+
+    /* Events. */
     int event_dimid, group_dimid, flash_dimid;
     int event_id_varid;
-    int group_id_varid, group_time_offset_varid;
-    int group_frame_time_offset_varid, group_lat_varid, group_lon_varid;
-    int group_area_varid, group_energy_varid, group_parent_flash_id_varid;
-    int group_quality_flag_varid;
+    int event_time_offset_varid, event_lat_varid, event_lon_varid;
+    int event_energy_varid, event_parent_group_id_varid;
     int *event_id = NULL;
     short *event_time_offset = NULL, *event_lat = NULL, *event_lon = NULL;
     short *event_energy = NULL;
     int *event_parent_group_id = NULL; 
+
+    /* Groups. */
+    int group_id_varid, group_time_offset_varid;
+    int group_frame_time_offset_varid, group_lat_varid, group_lon_varid;
+    int group_area_varid, group_energy_varid, group_parent_flash_id_varid;
+    int group_quality_flag_varid;
     int *group_id = NULL;
     short *group_time_offset = NULL;
     short *group_frame_time_offset = NULL;
     float *group_lat = NULL, *group_lon = NULL;
     short *group_area = NULL, *group_energy = NULL, *group_parent_flash_id = NULL;
     short *group_quality_flag = NULL;
-    int event_time_offset_varid, event_lat_varid, event_lon_varid;
-    int event_energy_varid, event_parent_group_id_varid;
+
+    /* Flashes. */
+
     int ret;
     
     /* Open the data file as read-only. */
@@ -177,7 +184,7 @@ glm_read_file(char *file_name, int verbose)
 	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
 	       ngroups, nevents);
 
-    /* Allocate storeage. */
+    /* Allocate storeage for event variables. */
     if (!(event_id = malloc(nevents * sizeof(int))))
 	ERR;
     if (!(event_time_offset = malloc(nevents * sizeof(short))))
@@ -190,7 +197,27 @@ glm_read_file(char *file_name, int verbose)
 	ERR;
     if (!(event_parent_group_id = malloc(nevents * sizeof(int))))
 	ERR;
-    
+
+        /* Allocate storeage for group variables. */
+    if (!(group_id = malloc(ngroups * sizeof(int))))
+	ERR;
+    if (!(group_time_offset = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_frame_time_offset = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_lat = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_lon = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_area = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_energy = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_parent_flash_id = malloc(ngroups * sizeof(int))))
+	ERR;
+    if (!(group_quality_flag = malloc(ngroups * sizeof(int))))
+	ERR;
+
     /* Find the varids for the event variables. */
     if ((ret = nc_inq_varid(ncid, EVENT_ID, &event_id_varid)))
 	NC_ERR(ret);
@@ -202,7 +229,27 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_inq_varid(ncid, EVENT_ENERGY, &event_energy_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, EVENT_ENERGY, &event_parent_group_id_varid)))
+    if ((ret = nc_inq_varid(ncid, EVENT_PARENT_GROUP_ID, &event_parent_group_id_varid)))
+	NC_ERR(ret);
+    
+    /* Find the varids for the group variables. */
+    if ((ret = nc_inq_varid(ncid, GROUP_ID, &group_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_TIME_OFFSET, &group_time_offset_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_FRAME_TIME_OFFSET, &group_frame_time_offset_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_LAT, &group_lat_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_LON, &group_lon_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_AREA, &group_area_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_ENERGY, &group_energy_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_PARENT_FLASH_ID, &group_parent_flash_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_QUALITY_FLAG, &group_quality_flag_varid)))
 	NC_ERR(ret);
     
     /* Find the varids for the group variables. */

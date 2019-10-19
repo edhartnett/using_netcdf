@@ -512,9 +512,58 @@ glm_read_file(char *file_name, int verbose)
     if ((ret = nc_get_var_int(ncid, group_count_varid, &group_count)))
     	NC_ERR(ret);
 
-        if ((ret = nc_inq_varid(ncid, FLASH_COUNT, &flash_count_varid)))
+    if ((ret = nc_inq_varid(ncid, FLASH_COUNT, &flash_count_varid)))
 	NC_ERR(ret);
     if ((ret = nc_get_var_int(ncid, flash_count_varid, &flash_count)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, PERCENT_NAVIGATED_L1B_EVENTS, &percent_navigated_L1b_events_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, percent_navigated_L1b_events_varid, &percent_navigated_L1b_events)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, YAW_FLIP_FLAG, &yaw_flip_flag_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_schar(ncid, yaw_flip_flag_varid, &yaw_flip_flag)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, NOMINAL_SATELLITE_SUBPOINT_LAT, &nominal_satellite_subpoint_lat_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, nominal_satellite_subpoint_lat_varid, &nominal_satellite_subpoint_lat)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, NOMINAL_SATELLITE_HEIGHT, &nominal_satellite_height_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, nominal_satellite_height_varid, &nominal_satellite_height)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, NOMINAL_SATELLITE_SUBPOINT_LON, &nominal_satellite_subpoint_lon_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, nominal_satellite_subpoint_lon_varid, &nominal_satellite_subpoint_lon)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, LON_FIELD_OF_VIEW, &lon_field_of_view_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, lon_field_of_view_varid, &lon_field_of_view)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, LON_FIELD_OF_VIEW_BOUNDS, &lon_field_of_view_bounds_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, lon_field_of_view_bounds_varid, lon_field_of_view_bounds)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, PERCENT_UNCORRECTABLE_L0_ERRORS,
+			    &percent_uncorrectable_L0_errors_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, percent_uncorrectable_L0_errors_varid,
+				&percent_uncorrectable_L0_errors)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, ALGORITHM_DYNAMIC_INPUT_DATA_CONTAINER,
+			    &algorithm_dynamic_input_data_container_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, algorithm_dynamic_input_data_container_varid,
+			      &algorithm_dynamic_input_data_container)))
     	NC_ERR(ret);
 
 

@@ -145,7 +145,7 @@ glm_read_file(char *file_name, int verbose)
     short *group_quality_flag = NULL;
 
     /* Flashes. */
-    int flash_id_varid, flash_time_offset_varid;
+    int flash_id_varid;
     int flash_time_offset_of_first_event_varid;
     int flash_time_offset_of_last_event_varid;
     int flash_frame_time_offset_of_first_event_varid;
@@ -363,6 +363,28 @@ glm_read_file(char *file_name, int verbose)
 	free(group_parent_flash_id);
     if (group_quality_flag)
 	free(group_quality_flag);
+
+    /* Free flash storage. */
+    if (flash_id)
+	free(flash_id);
+    if (flash_time_offset_of_first_event)
+	free(flash_time_offset_of_first_event);
+    if (flash_time_offset_of_last_event)
+	free(flash_time_offset_of_last_event);
+    if (flash_frame_time_offset_of_first_event)
+	free(flash_frame_time_offset_of_first_event);
+    if (flash_frame_time_offset_of_last_event)
+	free(flash_frame_time_offset_of_last_event);
+    if (flash_lat)
+	free(flash_lat);
+    if (flash_lon)
+	free(flash_lon);
+    if (flash_area)
+	free(flash_area);
+    if (flash_energy)
+	free(flash_energy);
+    if (flash_quality_flag)
+	free(flash_quality_flag);
 
     return 0;
 }

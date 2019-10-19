@@ -145,6 +145,7 @@ glm_read_file(char *file_name, int verbose)
     short *group_quality_flag = NULL;
 
     /* Flashes. */
+    
 
     int ret;
     
@@ -283,12 +284,14 @@ glm_read_file(char *file_name, int verbose)
     	NC_ERR(ret);
     if ((ret = nc_get_var_short(ncid, group_parent_flash_id_varid, group_parent_flash_id)))
     	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_quality_flag_varid, group_quality_flag)))
+    	NC_ERR(ret);
     
     /* Close the data file. */
     if ((ret = nc_close(ncid)))
 	NC_ERR(ret);
 
-    /* Free storage. */
+    /* Free event storage. */
     if (event_id)
 	free(event_id);
     if (event_time_offset)
@@ -301,6 +304,8 @@ glm_read_file(char *file_name, int verbose)
 	free(event_energy);
     if (event_parent_group_id)
 	free(event_parent_group_id);
+
+    /* Free group storage. */
     if (group_id)
 	free(group_id);
     if (group_time_offset)

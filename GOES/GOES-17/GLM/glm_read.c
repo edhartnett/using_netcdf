@@ -26,6 +26,11 @@
 /* Number of timing runs when -t option is used. */
 #define NUM_TRIALS 10
 
+/* The three dimensions number_of_time_bounds,
+ * number_of_field_of_view_bounds, number_of_wavelength_bounds have
+ * a length of 2. */
+#define EXTRA_DIM_LEN 2
+
 /* These are dimension names in the GLM data file. */
 #define NUMBER_OF_FLASHES "number_of_flashes"
 #define NUMBER_OF_GROUPS "number_of_groups"
@@ -212,19 +217,19 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_inq_dimlen(ncid, number_of_time_bounds_dimid, &ntime_bounds)))
 	NC_ERR(ret);
-    assert(ntime_bounds == 2);
+    assert(ntime_bounds == EXTRA_DIM_LEN);
 
     if ((ret = nc_inq_dimid(ncid, NUMBER_OF_FIELD_OF_VIEW_BOUNDS, &number_of_field_of_view_bounds_dimid)))
 	NC_ERR(ret);
     if ((ret = nc_inq_dimlen(ncid, number_of_field_of_view_bounds_dimid, &nfov_bounds)))
 	NC_ERR(ret);
-    assert(nfov_bounds == 2);
+    assert(nfov_bounds == EXTRA_DIM_LEN);
 
     if ((ret = nc_inq_dimid(ncid, NUMBER_OF_WAVELENGTH_BOUNDS, &number_of_wavelength_bounds_dimid)))
 	NC_ERR(ret);
     if ((ret = nc_inq_dimlen(ncid, number_of_wavelength_bounds_dimid, &nwl_bounds)))
 	NC_ERR(ret);
-    assert(nwl_bounds == 2);
+    assert(nwl_bounds == EXTRA_DIM_LEN);
 
     if (verbose)
 	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
@@ -404,17 +409,43 @@ glm_read_file(char *file_name, int verbose)
     if ((ret = nc_get_var_short(ncid, flash_quality_flag_varid, flash_quality_flag)))
     	NC_ERR(ret);
 
+    int product_time_varid;
     double product_time;
-    int product_time_varid;;
+    int product_time_bounds_varid;
+    double product_time_bounds[EXTRA_DIM_LEN];
+    int lightning_wavelength_varid;
+    float lightning_wavelength;
+    int lightning_wavelength_bounds_varid;
+    float lightning_wavelength_bounds[EXTRA_DIM_LEN];
+    int group_time_threshold_varid;
+    float group_time_threshold;
 
-    /* Read scalars. */
+    /* Get varids and values of scalars and small vars. */
     if ((ret = nc_inq_varid(ncid, PRODUCT_TIME, &product_time_varid)))
 	NC_ERR(ret);
-
-    /* Read scalars. */
     if ((ret = nc_get_var_double(ncid, product_time_varid, &product_time)))
     	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, PRODUCT_TIME_BOUNDS, &product_time_bounds_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_double(ncid, product_time_bounds_varid, product_time_bounds)))
+    	NC_ERR(ret);
     
+    if ((ret = nc_inq_varid(ncid, LIGHTNING_WAVELENGTH, &lightning_wavelength_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, lightning_wavelength_varid, &lightning_wavelength)))
+    	NC_ERR(ret);
+
+    if ((ret = nc_inq_varid(ncid, LIGHTNING_WAVELENGTH_BOUNDS, &lightning_wavelength_bounds_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, lightning_wavelength_bounds_varid, lightning_wavelength_bounds)))
+    	NC_ERR(ret);
+    
+    if ((ret = nc_inq_varid(ncid, GROUP_TIME_THRESHOLD, &group_time_threshold_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, group_time_threshold_varid, &group_time_threshold)))
+    	NC_ERR(ret);
+
     /* Close the data file. */
     if ((ret = nc_close(ncid)))
 	NC_ERR(ret);

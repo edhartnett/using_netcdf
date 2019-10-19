@@ -145,7 +145,22 @@ glm_read_file(char *file_name, int verbose)
     short *group_quality_flag = NULL;
 
     /* Flashes. */
-    
+    int flash_id_varid, flash_time_offset_varid;
+    int flash_time_offset_of_first_event_varid;
+    int flash_time_offset_of_last_event_varid;
+    int flash_frame_time_offset_of_first_event_varid;
+    int flash_frame_time_offset_of_last_event_varid;
+    int flash_lat_varid, flash_lon_varid;
+    int flash_area_varid, flash_energy_varid;
+    int flash_quality_flag_varid;
+    short *flash_id = NULL;
+    short *flash_time_offset_of_first_event = NULL;
+    short *flash_time_offset_of_last_event = NULL;
+    short *flash_frame_time_offset_of_first_event = NULL;
+    short *flash_frame_time_offset_of_last_event = NULL;
+    float *flash_lat = NULL, *flash_lon = NULL;
+    short *flash_area = NULL, *flash_energy = NULL;
+    short *flash_quality_flag = NULL;
 
     int ret;
     

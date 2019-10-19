@@ -47,7 +47,7 @@
 #define FLASH_FRAME_TIME_OFFSET_OF_FIRST_EVENT "flash_frame_time_offset_of_first_event"
 #define FLASH_FRAME_TIME_OFFSET_OF_LAST_EVENT "flash_frame_time_offset_of_last_event"
 #define FLASH_LAT "flash_lat"
-#define FLAGS_LON "flash_lon"
+#define FLASH_LON "flash_lon"
 #define FLASH_AREA "flash_area"
 #define FLASH_ENERGY "flash_energy"
 #define FLASH_QUALITY_FLAG "flash_quality_flag"
@@ -267,7 +267,31 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_inq_varid(ncid, GROUP_QUALITY_FLAG, &group_quality_flag_varid)))
 	NC_ERR(ret);
-    
+
+        /* Find the varids for the flash variables. */
+    if ((ret = nc_inq_varid(ncid, FLASH_ID, &flash_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_TIME_OFFSET_OF_FIRST_EVENT, &flash_time_offset_of_first_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_TIME_OFFSET_OF_LAST_EVENT, &flash_time_offset_of_last_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_FRAME_TIME_OFFSET_OF_FIRST_EVENT,
+			    &flash_frame_time_offset_of_first_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_FRAME_TIME_OFFSET_OF_LAST_EVENT,
+			    &flash_frame_time_offset_of_last_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_LAT, &flash_lat_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_LON, &flash_lon_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_AREA, &flash_area_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_ENERGY, &flash_energy_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_QUALITY_FLAG, &flash_quality_flag_varid)))
+	NC_ERR(ret);
+
     /* Read the event variables. */
     if ((ret = nc_get_var_int(ncid, event_id_varid, event_id)))
 	NC_ERR(ret);

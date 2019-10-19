@@ -252,10 +252,6 @@ glm_read_file(char *file_name, int verbose)
     if ((ret = nc_inq_varid(ncid, GROUP_QUALITY_FLAG, &group_quality_flag_varid)))
 	NC_ERR(ret);
     
-    /* Find the varids for the group variables. */
-    if ((ret = nc_inq_varid(ncid, GROUP_ID, &group_id_varid)))
-	NC_ERR(ret);
-
     /* Read the event variables. */
     if ((ret = nc_get_var_int(ncid, event_id_varid, event_id)))
 	NC_ERR(ret);
@@ -271,6 +267,22 @@ glm_read_file(char *file_name, int verbose)
     	NC_ERR(ret);
 
     /* Read the group variables. */
+    if ((ret = nc_get_var_int(ncid, group_id_varid, group_id)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_time_offset_varid, group_time_offset)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_frame_time_offset_varid, group_frame_time_offset)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_lat_varid, group_lat)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_lon_varid, group_lon)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_area_varid, area_energy)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_energy_varid, group_energy)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, group_parent_flash_id_varid, group_parent_flash_id)))
+    	NC_ERR(ret);
     
     /* Close the data file. */
     if ((ret = nc_close(ncid)))

@@ -190,6 +190,100 @@ read_event_vars(int ncid, int nevents, GLM_EVENT_T *event)
 int
 read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
 {
+    /* Groups. */
+    int group_id_varid, group_time_offset_varid;
+    int group_frame_time_offset_varid, group_lat_varid, group_lon_varid;
+    int group_area_varid, group_energy_varid, group_parent_flash_id_varid;
+    int group_quality_flag_varid;
+    int *group_id = NULL;
+    short *group_time_offset = NULL;
+    short *group_frame_time_offset = NULL;
+    float *group_lat = NULL, *group_lon = NULL;
+    short *group_area = NULL, *group_energy = NULL, *group_parent_flash_id = NULL;
+    short *group_quality_flag = NULL;
+
+    int ret;
+
+    /* Allocate storeage for group variables. */
+    if (!(group_id = malloc(ngroups * sizeof(int))))
+	ERR;
+    if (!(group_time_offset = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_frame_time_offset = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_lat = malloc(ngroups * sizeof(float))))
+	ERR;
+    if (!(group_lon = malloc(ngroups * sizeof(float))))
+	ERR;
+    if (!(group_area = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_energy = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_parent_flash_id = malloc(ngroups * sizeof(short))))
+	ERR;
+    if (!(group_quality_flag = malloc(ngroups * sizeof(int))))
+	ERR;
+
+    /* Find the varids for the group variables. */
+    if ((ret = nc_inq_varid(ncid, GROUP_ID, &group_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_TIME_OFFSET, &group_time_offset_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_FRAME_TIME_OFFSET, &group_frame_time_offset_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_LAT, &group_lat_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_LON, &group_lon_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_AREA, &group_area_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_ENERGY, &group_energy_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_PARENT_FLASH_ID, &group_parent_flash_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, GROUP_QUALITY_FLAG, &group_quality_flag_varid)))
+	NC_ERR(ret);
+
+    /* Read the group variables. */
+    if ((ret = nc_get_var_int(ncid, group_id_varid, group_id)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_time_offset_varid, group_time_offset)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_frame_time_offset_varid, group_frame_time_offset)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, group_lat_varid, group_lat)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, group_lon_varid, group_lon)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_area_varid, group_area)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_energy_varid, group_energy)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_parent_flash_id_varid, group_parent_flash_id)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, group_quality_flag_varid, group_quality_flag)))
+    	NC_ERR(ret);
+
+    /* Free group storage. */
+    if (group_id)
+	free(group_id);
+    if (group_time_offset)
+	free(group_time_offset);
+    if (group_frame_time_offset)
+	free(group_frame_time_offset);
+    if (group_lat)
+	free(group_lat);
+    if (group_lon)
+	free(group_lon);
+    if (group_area)
+	free(group_area);
+    if (group_energy)
+	free(group_energy);
+    if (group_parent_flash_id)
+	free(group_parent_flash_id);
+    if (group_quality_flag)
+	free(group_quality_flag);
+
     return 0;
 }
 
@@ -259,18 +353,6 @@ glm_read_file(char *file_name, int verbose)
     int number_of_wavelength_bounds_dimid;
     size_t nevents, ngroups, nflashes;
     size_t ntime_bounds, nfov_bounds, nwl_bounds;
-
-    /* Groups. */
-    int group_id_varid, group_time_offset_varid;
-    int group_frame_time_offset_varid, group_lat_varid, group_lon_varid;
-    int group_area_varid, group_energy_varid, group_parent_flash_id_varid;
-    int group_quality_flag_varid;
-    int *group_id = NULL;
-    short *group_time_offset = NULL;
-    short *group_frame_time_offset = NULL;
-    float *group_lat = NULL, *group_lon = NULL;
-    short *group_area = NULL, *group_energy = NULL, *group_parent_flash_id = NULL;
-    short *group_quality_flag = NULL;
 
     /* Flashes. Note that event_id and group_id are int, but flash_id
      * is short. */
@@ -360,7 +442,7 @@ glm_read_file(char *file_name, int verbose)
 	ERR;
     free(event);
     
-    /* Read the event vars. */
+    /* Read the group vars. */
     if (!(group = malloc(ngroups * sizeof(GLM_GROUP_T))))
 	ERR;
     if ((ret = read_group_vars(ncid, ngroups, group)))
@@ -374,26 +456,6 @@ glm_read_file(char *file_name, int verbose)
 	ERR;
     free(flash);
     
-    /* Allocate storeage for group variables. */
-    if (!(group_id = malloc(ngroups * sizeof(int))))
-	ERR;
-    if (!(group_time_offset = malloc(ngroups * sizeof(short))))
-	ERR;
-    if (!(group_frame_time_offset = malloc(ngroups * sizeof(short))))
-	ERR;
-    if (!(group_lat = malloc(ngroups * sizeof(float))))
-	ERR;
-    if (!(group_lon = malloc(ngroups * sizeof(float))))
-	ERR;
-    if (!(group_area = malloc(ngroups * sizeof(short))))
-	ERR;
-    if (!(group_energy = malloc(ngroups * sizeof(short))))
-	ERR;
-    if (!(group_parent_flash_id = malloc(ngroups * sizeof(short))))
-	ERR;
-    if (!(group_quality_flag = malloc(ngroups * sizeof(int))))
-	ERR;
-
     /* Allocate storeage for flash variables. */
     if (!(flash_id = malloc(nflashes * sizeof(short))))
 	ERR;
@@ -415,26 +477,6 @@ glm_read_file(char *file_name, int verbose)
 	ERR;
     if (!(flash_quality_flag = malloc(nflashes * sizeof(short))))
 	ERR;
-
-    /* Find the varids for the group variables. */
-    if ((ret = nc_inq_varid(ncid, GROUP_ID, &group_id_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, GROUP_TIME_OFFSET, &group_time_offset_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, GROUP_FRAME_TIME_OFFSET, &group_frame_time_offset_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, GROUP_LAT, &group_lat_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, GROUP_LON, &group_lon_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, GROUP_AREA, &group_area_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, GROUP_ENERGY, &group_energy_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, GROUP_PARENT_FLASH_ID, &group_parent_flash_id_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, GROUP_QUALITY_FLAG, &group_quality_flag_varid)))
-	NC_ERR(ret);
 
     /* Find the varids for the flash variables. */
     if ((ret = nc_inq_varid(ncid, FLASH_ID, &flash_id_varid)))
@@ -459,26 +501,6 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_inq_varid(ncid, FLASH_QUALITY_FLAG, &flash_quality_flag_varid)))
 	NC_ERR(ret);
-
-    /* Read the group variables. */
-    if ((ret = nc_get_var_int(ncid, group_id_varid, group_id)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, group_time_offset_varid, group_time_offset)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, group_frame_time_offset_varid, group_frame_time_offset)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, group_lat_varid, group_lat)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, group_lon_varid, group_lon)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, group_area_varid, group_area)))
-    	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, group_energy_varid, group_energy)))
-    	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, group_parent_flash_id_varid, group_parent_flash_id)))
-    	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, group_quality_flag_varid, group_quality_flag)))
-    	NC_ERR(ret);
 
     /* Read the flash variables. */
     if ((ret = nc_get_var_short(ncid, flash_id_varid, flash_id)))
@@ -688,26 +710,6 @@ glm_read_file(char *file_name, int verbose)
     /* Close the data file. */
     if ((ret = nc_close(ncid)))
 	NC_ERR(ret);
-
-    /* Free group storage. */
-    if (group_id)
-	free(group_id);
-    if (group_time_offset)
-	free(group_time_offset);
-    if (group_frame_time_offset)
-	free(group_frame_time_offset);
-    if (group_lat)
-	free(group_lat);
-    if (group_lon)
-	free(group_lon);
-    if (group_area)
-	free(group_area);
-    if (group_energy)
-	free(group_energy);
-    if (group_parent_flash_id)
-	free(group_parent_flash_id);
-    if (group_quality_flag)
-	free(group_quality_flag);
 
     /* Free flash storage. */
     if (flash_id)

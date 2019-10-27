@@ -63,6 +63,8 @@ show_att(int ncid, int varid, char *name)
     return 0;
 }
 
+/* Read and unpack all the event data in the file. It will be loaded
+ * into the pre-allocated array of struct event. */
 int
 read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
 {
@@ -81,6 +83,9 @@ read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
     float event_time_offset_scale, event_time_offset_offset;
     int i;
     int ret;
+
+    /* Check inputs. */
+    assert(ncid && event && nevents > 0);
 
     /* Allocate storeage for event variables. */
     if (!(event_id = malloc(nevents * sizeof(int))))

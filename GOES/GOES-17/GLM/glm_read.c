@@ -17,6 +17,7 @@
 #include <assert.h>
 #include <netcdf.h>
 #include "un_test.h"
+#include "un_glm_data.h"
 
 /* Attribute names. */
 #define TITLE "title"
@@ -25,69 +26,6 @@
 
 /* Number of timing runs when -t option is used. */
 #define NUM_TRIALS 10
-
-/* The three dimensions number_of_time_bounds,
- * number_of_field_of_view_bounds, number_of_wavelength_bounds have
- * a length of 2. */
-#define EXTRA_DIM_LEN 2
-
-/* These are dimension names in the GLM data file. */
-#define NUMBER_OF_FLASHES "number_of_flashes"
-#define NUMBER_OF_GROUPS "number_of_groups"
-#define NUMBER_OF_EVENTS "number_of_events"
-#define NUMBER_OF_TIME_BOUNDS "number_of_time_bounds"
-#define NUMBER_OF_FIELD_OF_VIEW_BOUNDS "number_of_field_of_view_bounds"
-#define NUMBER_OF_WAVELENGTH_BOUNDS "number_of_wavelength_bounds"
-
-/* Variable names. */
-#define EVENT_ID "event_id"
-#define EVENT_TIME_OFFSET "event_time_offset"
-#define EVENT_LAT "event_lat"
-#define EVENT_LON "event_lon"
-#define EVENT_ENERGY "event_energy"
-#define EVENT_PARENT_GROUP_ID "event_parent_group_id"
-#define GROUP_ID "group_id"
-#define GROUP_TIME_OFFSET "group_time_offset"
-#define GROUP_FRAME_TIME_OFFSET "group_frame_time_offset"
-#define GROUP_LAT "group_lat"
-#define GROUP_LON "group_lon"
-#define GROUP_AREA "group_area"
-#define GROUP_ENERGY "group_energy"
-#define GROUP_PARENT_FLASH_ID "group_parent_flash_id"
-#define GROUP_QUALITY_FLAG "group_quality_flag"
-#define FLASH_ID "flash_id"
-#define FLASH_TIME_OFFSET_OF_FIRST_EVENT "flash_time_offset_of_first_event"
-#define FLASH_TIME_OFFSET_OF_LAST_EVENT "flash_time_offset_of_last_event"
-#define FLASH_FRAME_TIME_OFFSET_OF_FIRST_EVENT "flash_frame_time_offset_of_first_event"
-#define FLASH_FRAME_TIME_OFFSET_OF_LAST_EVENT "flash_frame_time_offset_of_last_event"
-#define FLASH_LAT "flash_lat"
-#define FLASH_LON "flash_lon"
-#define FLASH_AREA "flash_area"
-#define FLASH_ENERGY "flash_energy"
-#define FLASH_QUALITY_FLAG "flash_quality_flag"
-#define PRODUCT_TIME "product_time"
-#define PRODUCT_TIME_BOUNDS "product_time_bounds"
-#define LIGHTNING_WAVELENGTH "lightning_wavelength"
-#define LIGHTNING_WAVELENGTH_BOUNDS "lightning_wavelength_bounds"
-#define GROUP_TIME_THRESHOLD "group_time_threshold"
-#define FLASH_TIME_THRESHOLD "flash_time_threshold"
-#define LAT_FIELD_OF_VIEW "lat_field_of_view"
-#define LAT_FIELD_OF_VIEW_BOUNDS "lat_field_of_view_bounds"
-#define GOES_LAT_LON_PROJECTION "goes_lat_lon_projection"
-#define EVENT_COUNT "event_count"
-#define GROUP_COUNT "group_count"
-#define FLASH_COUNT "flash_count"
-#define PERCENT_NAVIGATED_L1B_EVENTS "percent_navigated_L1b_events"
-#define YAW_FLIP_FLAG "yaw_flip_flag"
-#define NOMINAL_SATELLITE_SUBPOINT_LAT "nominal_satellite_subpoint_lat"
-#define NOMINAL_SATELLITE_HEIGHT "nominal_satellite_height"
-#define NOMINAL_SATELLITE_SUBPOINT_LON "nominal_satellite_subpoint_lon"
-#define LON_FIELD_OF_VIEW "lon_field_of_view"
-#define LON_FIELD_OF_VIEW_BOUNDS "lon_field_of_view_bounds"
-#define PERCENT_UNCORRECTABLE_L0_ERRORS "percent_uncorrectable_L0_errors"
-#define ALGORITHM_DYNAMIC_INPUT_DATA_CONTAINER "algorithm_dynamic_input_data_container"
-#define PROCESSING_PARM_VERSION_CONTAINER "processing_parm_version_container"
-#define ALGORITHM_PRODUCT_VERSION_CONTAINER "algorithm_product_version_container"
 
 /* Usage description. */
 #define USAGE   "\
@@ -125,6 +63,148 @@ show_att(int ncid, int varid, char *name)
     return 0;
 }
 
+/* Read and unpack all the event data in the file. It will be loaded
+ * into the pre-allocated array of struct event. */
+int
+read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
+{
+    /* Event varids. */
+    int event_id_varid;
+    int event_time_offset_varid, event_lat_varid, event_lon_varid;
+    int event_energy_varid, event_parent_group_id_varid;
+
+    /* Storage for packed data. */
+    int *event_id = NULL;
+    short *event_time_offset = NULL, *event_lat = NULL, *event_lon = NULL;
+    short *event_energy = NULL;
+    int *event_parent_group_id = NULL;
+
+    /* Scale factors and offsets. */
+    float event_time_offset_scale, event_time_offset_offset;
+    int i;
+    int ret;
+
+    /* Check inputs. */
+    assert(ncid && event && nevents > 0);
+
+    /* Allocate storeage for event variables. */
+    if (!(event_id = malloc(nevents * sizeof(int))))
+	ERR;
+    if (!(event_time_offset = malloc(nevents * sizeof(short))))
+	ERR;
+    if (!(event_lat = malloc(nevents * sizeof(short))))
+	ERR;
+    if (!(event_lon = malloc(nevents * sizeof(short))))
+	ERR;
+    if (!(event_energy = malloc(nevents * sizeof(short))))
+	ERR;
+    if (!(event_parent_group_id = malloc(nevents * sizeof(int))))
+	ERR;
+
+    /* Find the varids for the event variables. Also get the scale
+     * factors and offsets. */
+    if ((ret = nc_inq_varid(ncid, EVENT_ID, &event_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_TIME_OFFSET, &event_time_offset_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, event_time_offset_varid, SCALE_FACTOR, &event_time_offset_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, event_time_offset_varid, ADD_OFFSET, &event_time_offset_offset)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_LAT, &event_lat_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_LON, &event_lon_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_ENERGY, &event_energy_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, EVENT_PARENT_GROUP_ID, &event_parent_group_id_varid)))
+	NC_ERR(ret);
+    
+    /* Read the event variables. */
+    if ((ret = nc_get_var_int(ncid, event_id_varid, event_id)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, event_time_offset_varid, event_time_offset)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, event_lat_varid, event_lat)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, event_lon_varid, event_lon)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, event_energy_varid, event_energy)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_int(ncid, event_parent_group_id_varid, event_parent_group_id)))
+	NC_ERR(ret);
+
+    /* Unpack the data into our already-allocated array of struct
+     * UN_GLM_EVENT. */
+    for (i = 0; i < nevents; i++)
+    {
+	event[i].id = event_id[i];
+	event[i].time_offset = event_time_offset[i]/event_time_offset_scale + event_time_offset_offset;
+    }
+
+    /* Free event storage. */
+    if (event_id)
+	free(event_id);
+    if (event_time_offset)
+	free(event_time_offset);
+    if (event_lat)
+	free(event_lat);
+    if (event_lon)
+	free(event_lon);
+    if (event_energy)
+	free(event_energy);
+    if (event_parent_group_id)
+	free(event_parent_group_id);
+  
+    return 0;
+}
+
+/*
+  From GOES R SERIESPRODUCT DEFINITION AND USERS’ GUIDE(PUG) Vol 3
+  (https://www.goes-r.gov/users/docs/PUG-L1b-vol3.pdf)
+
+  The classic model for netCDF (used by the GS) does not support
+  unsigned integers larger than 8 bits.  Many of the variables in
+  GOES-R netCDF files are unsigned integers of 16-bit or 32-bit
+  length.  The following process is recommended to convert these
+  unsigned integers:
+
+  1.Retrieve the variable data from the netCDF file.
+
+  2.For this variable, retrieve the attribute “_Unsigned”.
+
+  3.If the “_Unsigned” attribute is set to “true” or “True”, then
+  cast the variable data to be unsigned.
+
+  The steps above must be completed before applying the
+  scale_factor and add_offset values to convert from scaled
+  integer to science units.  Also, the valid_range and _FillValue
+  attribute values are to be governed by the “_Unsigned” attribute
+
+  From a netCDF group email:
+  https://www.unidata.ucar.edu/mailing_lists/archives/netcdfgroup/2002/msg00034.html
+
+  Normally you store a group of numbers, all with the same scale
+  and offset. So first you calculate the min and max of that group
+  of numbers. Also let max_integer = maximum integer (eg for
+  INTEGER*2 this equals 32,167).
+
+  then
+  offset = min
+  scale = max_integer / (max - min)
+
+  store this number into netcdf file:
+
+  store_x = (x - offset) * scale = max_integer * (x - min) / (max - min)
+
+  note that when x = min, store_x = 0, and when x = max, store_x
+  max_integer.
+
+  the reading program should use the formula
+
+  x = store_x/scale + offset.
+
+*/
 int
 glm_read_file(char *file_name, int verbose)
 {
@@ -137,15 +217,6 @@ glm_read_file(char *file_name, int verbose)
     int number_of_wavelength_bounds_dimid;
     size_t nevents, ngroups, nflashes;
     size_t ntime_bounds, nfov_bounds, nwl_bounds;
-
-    /* Events. */
-    int event_id_varid;
-    int event_time_offset_varid, event_lat_varid, event_lon_varid;
-    int event_energy_varid, event_parent_group_id_varid;
-    int *event_id = NULL;
-    short *event_time_offset = NULL, *event_lat = NULL, *event_lon = NULL;
-    short *event_energy = NULL;
-    int *event_parent_group_id = NULL; 
 
     /* Groups. */
     int group_id_varid, group_time_offset_varid;
@@ -235,20 +306,14 @@ glm_read_file(char *file_name, int verbose)
 	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
 	       ngroups, nevents);
 
-    /* Allocate storeage for event variables. */
-    if (!(event_id = malloc(nevents * sizeof(int))))
+    /* Read the event vars. */
+    UN_GLM_EVENT_T *event;
+    if (!(event = malloc(nevents * sizeof(UN_GLM_EVENT_T))))
 	ERR;
-    if (!(event_time_offset = malloc(nevents * sizeof(short))))
+    if ((ret = read_event_vars(ncid, nevents, event)))
 	ERR;
-    if (!(event_lat = malloc(nevents * sizeof(short))))
-	ERR;
-    if (!(event_lon = malloc(nevents * sizeof(short))))
-	ERR;
-    if (!(event_energy = malloc(nevents * sizeof(short))))
-	ERR;
-    if (!(event_parent_group_id = malloc(nevents * sizeof(int))))
-	ERR;
-
+    free(event);
+    
     /* Allocate storeage for group variables. */
     if (!(group_id = malloc(ngroups * sizeof(int))))
 	ERR;
@@ -269,7 +334,7 @@ glm_read_file(char *file_name, int verbose)
     if (!(group_quality_flag = malloc(ngroups * sizeof(int))))
 	ERR;
 
-        /* Allocate storeage for flash variables. */
+    /* Allocate storeage for flash variables. */
     if (!(flash_id = malloc(nflashes * sizeof(short))))
 	ERR;
     if (!(flash_time_offset_of_first_event = malloc(nflashes * sizeof(short))))
@@ -291,20 +356,6 @@ glm_read_file(char *file_name, int verbose)
     if (!(flash_quality_flag = malloc(nflashes * sizeof(short))))
 	ERR;
 
-    /* Find the varids for the event variables. */
-    if ((ret = nc_inq_varid(ncid, EVENT_ID, &event_id_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, EVENT_TIME_OFFSET, &event_time_offset_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, EVENT_LAT, &event_lat_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, EVENT_LON, &event_lon_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, EVENT_ENERGY, &event_energy_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, EVENT_PARENT_GROUP_ID, &event_parent_group_id_varid)))
-	NC_ERR(ret);
-    
     /* Find the varids for the group variables. */
     if ((ret = nc_inq_varid(ncid, GROUP_ID, &group_id_varid)))
 	NC_ERR(ret);
@@ -325,7 +376,7 @@ glm_read_file(char *file_name, int verbose)
     if ((ret = nc_inq_varid(ncid, GROUP_QUALITY_FLAG, &group_quality_flag_varid)))
 	NC_ERR(ret);
 
-        /* Find the varids for the flash variables. */
+    /* Find the varids for the flash variables. */
     if ((ret = nc_inq_varid(ncid, FLASH_ID, &flash_id_varid)))
 	NC_ERR(ret);
     if ((ret = nc_inq_varid(ncid, FLASH_TIME_OFFSET_OF_FIRST_EVENT, &flash_time_offset_of_first_event_varid)))
@@ -348,20 +399,6 @@ glm_read_file(char *file_name, int verbose)
 	NC_ERR(ret);
     if ((ret = nc_inq_varid(ncid, FLASH_QUALITY_FLAG, &flash_quality_flag_varid)))
 	NC_ERR(ret);
-
-    /* Read the event variables. */
-    if ((ret = nc_get_var_int(ncid, event_id_varid, event_id)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, event_time_offset_varid, event_time_offset)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, event_lat_varid, event_lat)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, event_lon_varid, event_lon)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, event_energy_varid, event_energy)))
-    	NC_ERR(ret);
-    if ((ret = nc_get_var_int(ncid, event_parent_group_id_varid, event_parent_group_id)))
-    	NC_ERR(ret);
 
     /* Read the group variables. */
     if ((ret = nc_get_var_int(ncid, group_id_varid, group_id)))
@@ -592,20 +629,6 @@ glm_read_file(char *file_name, int verbose)
     if ((ret = nc_close(ncid)))
 	NC_ERR(ret);
 
-    /* Free event storage. */
-    if (event_id)
-	free(event_id);
-    if (event_time_offset)
-	free(event_time_offset);
-    if (event_lat)
-	free(event_lat);
-    if (event_lon)
-	free(event_lon);
-    if (event_energy)
-	free(event_energy);
-    if (event_parent_group_id)
-	free(event_parent_group_id);
-
     /* Free group storage. */
     if (group_id)
 	free(group_id);
@@ -727,7 +750,7 @@ main(int argc, char **argv)
 	}
 	
 	/* if (verbose) */
-	    printf("meta_read_us %d\n", meta_read_us);
+	printf("meta_read_us %d\n", meta_read_us);
     }
 
     if (timing)

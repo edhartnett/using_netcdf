@@ -292,6 +292,120 @@ read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
 int
 read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
 {
+    /* Flashes. Note that event_id and group_id are int, but flash_id
+     * is short. */
+    int flash_id_varid;
+    int flash_time_offset_of_first_event_varid;
+    int flash_time_offset_of_last_event_varid;
+    int flash_frame_time_offset_of_first_event_varid;
+    int flash_frame_time_offset_of_last_event_varid;
+    int flash_lat_varid, flash_lon_varid;
+    int flash_area_varid, flash_energy_varid;
+    int flash_quality_flag_varid;
+    short *flash_id = NULL;
+    short *flash_time_offset_of_first_event = NULL;
+    short *flash_time_offset_of_last_event = NULL;
+    short *flash_frame_time_offset_of_first_event = NULL;
+    short *flash_frame_time_offset_of_last_event = NULL;
+    float *flash_lat = NULL, *flash_lon = NULL;
+    short *flash_area = NULL, *flash_energy = NULL;
+    short *flash_quality_flag = NULL;
+    int ret;
+
+    /* Allocate storeage for flash variables. */
+    if (!(flash_id = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_time_offset_of_first_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_time_offset_of_last_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_frame_time_offset_of_first_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_frame_time_offset_of_last_event = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_lat = malloc(nflashes * sizeof(float))))
+	ERR;
+    if (!(flash_lon = malloc(nflashes * sizeof(float))))
+	ERR;
+    if (!(flash_area = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_energy = malloc(nflashes * sizeof(short))))
+	ERR;
+    if (!(flash_quality_flag = malloc(nflashes * sizeof(short))))
+	ERR;
+
+    /* Find the varids for the flash variables. */
+    if ((ret = nc_inq_varid(ncid, FLASH_ID, &flash_id_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_TIME_OFFSET_OF_FIRST_EVENT, &flash_time_offset_of_first_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_TIME_OFFSET_OF_LAST_EVENT, &flash_time_offset_of_last_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_FRAME_TIME_OFFSET_OF_FIRST_EVENT,
+			    &flash_frame_time_offset_of_first_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_FRAME_TIME_OFFSET_OF_LAST_EVENT,
+			    &flash_frame_time_offset_of_last_event_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_LAT, &flash_lat_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_LON, &flash_lon_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_AREA, &flash_area_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_ENERGY, &flash_energy_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_varid(ncid, FLASH_QUALITY_FLAG, &flash_quality_flag_varid)))
+	NC_ERR(ret);
+
+    /* Read the flash variables. */
+    if ((ret = nc_get_var_short(ncid, flash_id_varid, flash_id)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_time_offset_of_first_event_varid,
+				flash_time_offset_of_first_event)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_time_offset_of_last_event_varid,
+				flash_time_offset_of_last_event)))
+	NC_ERR(ret); 
+    if ((ret = nc_get_var_short(ncid, flash_frame_time_offset_of_first_event_varid,
+				flash_frame_time_offset_of_first_event)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_frame_time_offset_of_last_event_varid,
+				flash_frame_time_offset_of_last_event)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, flash_lat_varid, flash_lat)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_float(ncid, flash_lon_varid, flash_lon)))
+	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_area_varid, flash_area)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_energy_varid, flash_energy)))
+    	NC_ERR(ret);
+    if ((ret = nc_get_var_short(ncid, flash_quality_flag_varid, flash_quality_flag)))
+    	NC_ERR(ret);
+
+    /* Free flash storage. */
+    if (flash_id)
+	free(flash_id);
+    if (flash_time_offset_of_first_event)
+	free(flash_time_offset_of_first_event);
+    if (flash_time_offset_of_last_event)
+	free(flash_time_offset_of_last_event);
+    if (flash_frame_time_offset_of_first_event)
+	free(flash_frame_time_offset_of_first_event);
+    if (flash_frame_time_offset_of_last_event)
+	free(flash_frame_time_offset_of_last_event);
+    if (flash_lat)
+	free(flash_lat);
+    if (flash_lon)
+	free(flash_lon);
+    if (flash_area)
+	free(flash_area);
+    if (flash_energy)
+	free(flash_energy);
+    if (flash_quality_flag)
+	free(flash_quality_flag);
+
     return 0;
 }
 
@@ -353,25 +467,6 @@ glm_read_file(char *file_name, int verbose)
     int number_of_wavelength_bounds_dimid;
     size_t nevents, ngroups, nflashes;
     size_t ntime_bounds, nfov_bounds, nwl_bounds;
-
-    /* Flashes. Note that event_id and group_id are int, but flash_id
-     * is short. */
-    int flash_id_varid;
-    int flash_time_offset_of_first_event_varid;
-    int flash_time_offset_of_last_event_varid;
-    int flash_frame_time_offset_of_first_event_varid;
-    int flash_frame_time_offset_of_last_event_varid;
-    int flash_lat_varid, flash_lon_varid;
-    int flash_area_varid, flash_energy_varid;
-    int flash_quality_flag_varid;
-    short *flash_id = NULL;
-    short *flash_time_offset_of_first_event = NULL;
-    short *flash_time_offset_of_last_event = NULL;
-    short *flash_frame_time_offset_of_first_event = NULL;
-    short *flash_frame_time_offset_of_last_event = NULL;
-    float *flash_lat = NULL, *flash_lon = NULL;
-    short *flash_area = NULL, *flash_energy = NULL;
-    short *flash_quality_flag = NULL;
 
     /* Structs of events, groups, flashes. */
     GLM_EVENT_T *event;
@@ -456,78 +551,6 @@ glm_read_file(char *file_name, int verbose)
 	ERR;
     free(flash);
     
-    /* Allocate storeage for flash variables. */
-    if (!(flash_id = malloc(nflashes * sizeof(short))))
-	ERR;
-    if (!(flash_time_offset_of_first_event = malloc(nflashes * sizeof(short))))
-	ERR;
-    if (!(flash_time_offset_of_last_event = malloc(nflashes * sizeof(short))))
-	ERR;
-    if (!(flash_frame_time_offset_of_first_event = malloc(nflashes * sizeof(short))))
-	ERR;
-    if (!(flash_frame_time_offset_of_last_event = malloc(nflashes * sizeof(short))))
-	ERR;
-    if (!(flash_lat = malloc(nflashes * sizeof(float))))
-	ERR;
-    if (!(flash_lon = malloc(nflashes * sizeof(float))))
-	ERR;
-    if (!(flash_area = malloc(nflashes * sizeof(short))))
-	ERR;
-    if (!(flash_energy = malloc(nflashes * sizeof(short))))
-	ERR;
-    if (!(flash_quality_flag = malloc(nflashes * sizeof(short))))
-	ERR;
-
-    /* Find the varids for the flash variables. */
-    if ((ret = nc_inq_varid(ncid, FLASH_ID, &flash_id_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, FLASH_TIME_OFFSET_OF_FIRST_EVENT, &flash_time_offset_of_first_event_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, FLASH_TIME_OFFSET_OF_LAST_EVENT, &flash_time_offset_of_last_event_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, FLASH_FRAME_TIME_OFFSET_OF_FIRST_EVENT,
-			    &flash_frame_time_offset_of_first_event_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, FLASH_FRAME_TIME_OFFSET_OF_LAST_EVENT,
-			    &flash_frame_time_offset_of_last_event_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, FLASH_LAT, &flash_lat_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, FLASH_LON, &flash_lon_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, FLASH_AREA, &flash_area_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, FLASH_ENERGY, &flash_energy_varid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_varid(ncid, FLASH_QUALITY_FLAG, &flash_quality_flag_varid)))
-	NC_ERR(ret);
-
-    /* Read the flash variables. */
-    if ((ret = nc_get_var_short(ncid, flash_id_varid, flash_id)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, flash_time_offset_of_first_event_varid,
-				flash_time_offset_of_first_event)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, flash_time_offset_of_last_event_varid,
-				flash_time_offset_of_last_event)))
-	NC_ERR(ret); 
-    if ((ret = nc_get_var_short(ncid, flash_frame_time_offset_of_first_event_varid,
-				flash_frame_time_offset_of_first_event)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, flash_frame_time_offset_of_last_event_varid,
-				flash_frame_time_offset_of_last_event)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, flash_lat_varid, flash_lat)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, flash_lon_varid, flash_lon)))
-	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, flash_area_varid, flash_area)))
-    	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, flash_energy_varid, flash_energy)))
-    	NC_ERR(ret);
-    if ((ret = nc_get_var_short(ncid, flash_quality_flag_varid, flash_quality_flag)))
-    	NC_ERR(ret);
-
     int product_time_varid;
     double product_time;
     int product_time_bounds_varid;
@@ -710,28 +733,6 @@ glm_read_file(char *file_name, int verbose)
     /* Close the data file. */
     if ((ret = nc_close(ncid)))
 	NC_ERR(ret);
-
-    /* Free flash storage. */
-    if (flash_id)
-	free(flash_id);
-    if (flash_time_offset_of_first_event)
-	free(flash_time_offset_of_first_event);
-    if (flash_time_offset_of_last_event)
-	free(flash_time_offset_of_last_event);
-    if (flash_frame_time_offset_of_first_event)
-	free(flash_frame_time_offset_of_first_event);
-    if (flash_frame_time_offset_of_last_event)
-	free(flash_frame_time_offset_of_last_event);
-    if (flash_lat)
-	free(flash_lat);
-    if (flash_lon)
-	free(flash_lon);
-    if (flash_area)
-	free(flash_area);
-    if (flash_energy)
-	free(flash_energy);
-    if (flash_quality_flag)
-	free(flash_quality_flag);
 
     return 0;
 }

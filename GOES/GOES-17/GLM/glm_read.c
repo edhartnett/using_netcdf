@@ -307,8 +307,10 @@ read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
 	group[i].time_offset = (float)group_time_offset[i]/group_time_offset_scale + group_time_offset_offset;
 	group[i].lat = group_lat[i];
 	group[i].lon = group_lon[i];
+	group[i].area = (float)group_area[i]/group_area_scale + group_area_offset;
 	group[i].energy = (float)group_energy[i]/group_energy_scale + group_energy_offset;
 	group[i].parent_flash_id = group_parent_flash_id[i];
+	group[i].quality_flag = group_quality_flag[i];
     }
 
     /* Free group storage. */
@@ -357,6 +359,16 @@ read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
     float *flash_lat = NULL, *flash_lon = NULL;
     short *flash_area = NULL, *flash_energy = NULL;
     short *flash_quality_flag = NULL;
+
+    /* Scale factors and offsets. */
+    float flash_time_offset_of_first_event_scale, flash_time_offset_of_first_event_offset;
+    float flash_time_offset_of_last_event_scale, flash_time_offset_of_last_event_offset;
+    float flash_frame_time_offset_of_first_event_scale, flash_frame_time_offset_of_first_event_offset;
+    float flash_frame_time_offset_of_last_event_scale, flash_frame_time_offset_of_last_event_offset;
+    float flash_area_scale, flash_area_offset;
+    float flash_energy_scale, flash_energy_offset;
+
+    int i;
     int ret;
 
     /* Allocate storeage for flash variables. */
@@ -384,24 +396,65 @@ read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
     /* Find the varids for the flash variables. */
     if ((ret = nc_inq_varid(ncid, FLASH_ID, &flash_id_varid)))
 	NC_ERR(ret);
+
     if ((ret = nc_inq_varid(ncid, FLASH_TIME_OFFSET_OF_FIRST_EVENT, &flash_time_offset_of_first_event_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_time_offset_of_first_event_varid, SCALE_FACTOR, &flash_time_offset_of_first_event_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_time_offset_of_first_event_varid, ADD_OFFSET, &flash_time_offset_of_first_event_offset)))
+	NC_ERR(ret);
+
     if ((ret = nc_inq_varid(ncid, FLASH_TIME_OFFSET_OF_LAST_EVENT, &flash_time_offset_of_last_event_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_time_offset_of_last_event_varid, SCALE_FACTOR, &flash_time_offset_of_last_event_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_time_offset_of_last_event_varid, ADD_OFFSET, &flash_time_offset_of_last_event_offset)))
+	NC_ERR(ret);
+
     if ((ret = nc_inq_varid(ncid, FLASH_FRAME_TIME_OFFSET_OF_FIRST_EVENT,
 			    &flash_frame_time_offset_of_first_event_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_frame_time_offset_of_first_event_varid, SCALE_FACTOR,
+				&flash_frame_time_offset_of_first_event_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_frame_time_offset_of_first_event_varid, ADD_OFFSET,
+				&flash_frame_time_offset_of_first_event_offset)))
+	NC_ERR(ret);
+
     if ((ret = nc_inq_varid(ncid, FLASH_FRAME_TIME_OFFSET_OF_LAST_EVENT,
 			    &flash_frame_time_offset_of_last_event_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_frame_time_offset_of_last_event_varid, SCALE_FACTOR,
+				&flash_frame_time_offset_of_last_event_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_frame_time_offset_of_last_event_varid, ADD_OFFSET,
+				&flash_frame_time_offset_of_last_event_offset)))
+	NC_ERR(ret);
+
+    /* flash_lat is not packed. */
     if ((ret = nc_inq_varid(ncid, FLASH_LAT, &flash_lat_varid)))
 	NC_ERR(ret);
+
+    /* flash_lon is not packed. */
     if ((ret = nc_inq_varid(ncid, FLASH_LON, &flash_lon_varid)))
 	NC_ERR(ret);
+
     if ((ret = nc_inq_varid(ncid, FLASH_AREA, &flash_area_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_area_varid, SCALE_FACTOR, &flash_area_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_area_varid, ADD_OFFSET, &flash_area_offset)))
+	NC_ERR(ret);
+
     if ((ret = nc_inq_varid(ncid, FLASH_ENERGY, &flash_energy_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_energy_varid, SCALE_FACTOR, &flash_energy_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, flash_energy_varid, ADD_OFFSET, &flash_energy_offset)))
+	NC_ERR(ret);
+
+
+    /* flash_quality_flag is not packed. */
     if ((ret = nc_inq_varid(ncid, FLASH_QUALITY_FLAG, &flash_quality_flag_varid)))
 	NC_ERR(ret);
 
@@ -430,6 +483,26 @@ read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
     	NC_ERR(ret);
     if ((ret = nc_get_var_short(ncid, flash_quality_flag_varid, flash_quality_flag)))
     	NC_ERR(ret);
+
+    /* Unpack the data into our already-allocated array of struct
+     * GLM_FLASH. */
+    for (i = 0; i < nflashes; i++)
+    {
+	flash[i].id = flash_id[i];
+	flash[i].time_offset_of_first_event = (float)flash_time_offset_of_first_event[i]/flash_time_offset_of_first_event_scale +
+	    flash_time_offset_of_first_event_offset;
+	flash[i].time_offset_of_last_event = (float)flash_time_offset_of_last_event[i]/flash_time_offset_of_last_event_scale +
+	    flash_time_offset_of_last_event_offset;
+	flash[i].frame_time_offset_of_first_event = (float)flash_frame_time_offset_of_first_event[i]/flash_frame_time_offset_of_first_event_scale +
+	    flash_frame_time_offset_of_first_event_offset;
+	flash[i].frame_time_offset_of_last_event = (float)flash_frame_time_offset_of_last_event[i]/flash_frame_time_offset_of_last_event_scale +
+	    flash_frame_time_offset_of_last_event_offset;
+	flash[i].lat = flash_lat[i];
+	flash[i].lon = flash_lon[i];
+	flash[i].area = (float)flash_area[i]/flash_area_scale + flash_area_offset;
+	flash[i].energy = (float)flash_energy[i]/flash_energy_scale + flash_energy_offset;
+	flash[i].quality_flag = flash_quality_flag[i];
+    }
 
     /* Free flash storage. */
     if (flash_id)

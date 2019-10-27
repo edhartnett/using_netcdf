@@ -88,19 +88,26 @@ typedef struct GLM_GROUP
 {
     int id;
     unsigned int time_offset;
-    unsigned int lat;
-    unsigned int lon;
+    float lat;
+    float lon;
     unsigned int energy;
+    unsigned int area;
     unsigned int parent_flash_id;
+    short quality_flag;
 } GLM_GROUP_T;
 
 typedef struct GLM_FLASH
 {
     int id;
-    unsigned int time_offset;
-    unsigned int lat;
-    unsigned int lon;
-    unsigned int energy;
+    unsigned int time_offset_of_first_event;
+    unsigned int time_offset_of_last_event;
+    unsigned int frame_time_offset_of_first_event;
+    unsigned int frame_time_offset_of_last_event;
+    float lat;
+    float lon;
+    float area;
+    float energy;
+    short quality_flag;
 } GLM_FLASH_T;
 
 #endif /* _UN_GLM_DATA_H */

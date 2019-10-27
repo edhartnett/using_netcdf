@@ -13,7 +13,7 @@ TEST_EXTENSIONS = .sh
 check_PROGRAMS = glm_read
 
 # Source code for the test.
-glm_read_SOURCES = glm_read.c un_test.h tst_utils.c
+glm_read_SOURCES = glm_read.c un_glm_data.h un_test.h tst_utils.c
 
 # Run our test program.
 TESTS = tst_glm.sh 

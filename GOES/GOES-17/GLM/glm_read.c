@@ -162,6 +162,10 @@ read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
     {
 	event[i].id = event_id[i];
 	event[i].time_offset = (float)event_time_offset[i]/event_time_offset_scale + event_time_offset_offset;
+	event[i].lat = (float)event_lat[i]/event_lat_scale + event_lat_offset;
+	event[i].lon = (float)event_lon[i]/event_lon_scale + event_lon_offset;
+	event[i].energy = (float)event_energy[i]/event_energy_scale + event_energy_offset;
+	event[i].parent_group_id = event_parent_group_id[i];
     }
 
     /* Free event storage. */

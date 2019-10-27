@@ -70,6 +70,10 @@
 #define PROCESSING_PARM_VERSION_CONTAINER "processing_parm_version_container"
 #define ALGORITHM_PRODUCT_VERSION_CONTAINER "algorithm_product_version_container"
 
+/* Attribute names. */
+#define SCALE_FACTOR "scale_factor"
+#define ADD_OFFSET "add_offset"
+
 typedef struct UN_GLM_EVENT
 {
     int id;

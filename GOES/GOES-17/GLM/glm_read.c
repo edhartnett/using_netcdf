@@ -66,14 +66,20 @@ show_att(int ncid, int varid, char *name)
 int
 read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
 {
-    /* Events. */
+    /* Event varids. */
     int event_id_varid;
     int event_time_offset_varid, event_lat_varid, event_lon_varid;
     int event_energy_varid, event_parent_group_id_varid;
+
+    /* Storage for packed data. */
     int *event_id = NULL;
     short *event_time_offset = NULL, *event_lat = NULL, *event_lon = NULL;
     short *event_energy = NULL;
     int *event_parent_group_id = NULL;
+
+    /* Scale factors and offsets. */
+    float event_time_offset_scale, event_time_offset_offset;
+    int i;
     int ret;
 
     /* Allocate storeage for event variables. */
@@ -90,10 +96,15 @@ read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
     if (!(event_parent_group_id = malloc(nevents * sizeof(int))))
 	ERR;
 
-    /* Find the varids for the event variables. */
+    /* Find the varids for the event variables. Also get the scale
+     * factors and offsets. */
     if ((ret = nc_inq_varid(ncid, EVENT_ID, &event_id_varid)))
 	NC_ERR(ret);
     if ((ret = nc_inq_varid(ncid, EVENT_TIME_OFFSET, &event_time_offset_varid)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, event_time_offset_varid, SCALE_FACTOR, &event_time_offset_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, event_time_offset_varid, ADD_OFFSET, &event_time_offset_offset)))
 	NC_ERR(ret);
     if ((ret = nc_inq_varid(ncid, EVENT_LAT, &event_lat_varid)))
 	NC_ERR(ret);
@@ -117,6 +128,14 @@ read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
 	NC_ERR(ret);
     if ((ret = nc_get_var_int(ncid, event_parent_group_id_varid, event_parent_group_id)))
 	NC_ERR(ret);
+
+    /* Unpack the data into our already-allocated array of struct
+     * UN_GLM_EVENT. */
+    for (i = 0; i < nevents; i++)
+    {
+	event[i].id = event_id[i];
+	event[i].time_offset = event_time_offset[i]/event_time_offset_scale + event_time_offset_offset;
+    }
 
     /* Free event storage. */
     if (event_id)

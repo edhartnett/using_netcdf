@@ -81,6 +81,10 @@ read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
 
     /* Scale factors and offsets. */
     float event_time_offset_scale, event_time_offset_offset;
+    float event_lat_scale, event_lat_offset;
+    float event_lon_scale, event_lon_offset;
+    float event_energy_scale, event_energy_offset;
+
     int i;
     int ret;
 
@@ -105,18 +109,36 @@ read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
      * factors and offsets. */
     if ((ret = nc_inq_varid(ncid, EVENT_ID, &event_id_varid)))
 	NC_ERR(ret);
+    
     if ((ret = nc_inq_varid(ncid, EVENT_TIME_OFFSET, &event_time_offset_varid)))
 	NC_ERR(ret);
     if ((ret = nc_get_att_float(ncid, event_time_offset_varid, SCALE_FACTOR, &event_time_offset_scale)))
 	NC_ERR(ret);
     if ((ret = nc_get_att_float(ncid, event_time_offset_varid, ADD_OFFSET, &event_time_offset_offset)))
 	NC_ERR(ret);
+    
     if ((ret = nc_inq_varid(ncid, EVENT_LAT, &event_lat_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, event_lat_varid, SCALE_FACTOR, &event_lat_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, event_lat_varid, ADD_OFFSET, &event_lat_offset)))
+	NC_ERR(ret);
+    
     if ((ret = nc_inq_varid(ncid, EVENT_LON, &event_lon_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, event_lon_varid, SCALE_FACTOR, &event_lon_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, event_lon_varid, ADD_OFFSET, &event_lon_offset)))
+	NC_ERR(ret);
+    
     if ((ret = nc_inq_varid(ncid, EVENT_ENERGY, &event_energy_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, event_energy_varid, SCALE_FACTOR, &event_energy_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, event_energy_varid, ADD_OFFSET, &event_energy_offset)))
+	NC_ERR(ret);
+
+    /* event_parent_group_id is not packed. */
     if ((ret = nc_inq_varid(ncid, EVENT_PARENT_GROUP_ID, &event_parent_group_id_varid)))
 	NC_ERR(ret);
     
@@ -139,7 +161,7 @@ read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
     for (i = 0; i < nevents; i++)
     {
 	event[i].id = event_id[i];
-	event[i].time_offset = event_time_offset[i]/event_time_offset_scale + event_time_offset_offset;
+	event[i].time_offset = (float)event_time_offset[i]/event_time_offset_scale + event_time_offset_offset;
     }
 
     /* Free event storage. */

@@ -801,6 +801,7 @@ glm_read_file(char *file_name, int verbose)
     GLM_EVENT_T *event;
     GLM_GROUP_T *group;
     GLM_FLASH_T *flash;
+    GLM_SCALAR_T glm_scalar;
 
     int ret;
     
@@ -829,29 +830,21 @@ glm_read_file(char *file_name, int verbose)
 	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
 	       ngroups, nevents);
 
-    /* Read the event vars. */
+    /* Allocate storage. */
     if (!(event = malloc(nevents * sizeof(GLM_EVENT_T))))
 	ERR;
-    if ((ret = read_event_vars(ncid, nevents, event)))
-	ERR;
-    free(event);
-    
-    /* Read the group vars. */
     if (!(group = malloc(ngroups * sizeof(GLM_GROUP_T))))
+	ERR;
+    if (!(flash = malloc(nflashes * sizeof(GLM_FLASH_T))))
+	ERR;
+
+    /* Read the vars. */
+    if ((ret = read_event_vars(ncid, nevents, event)))
 	ERR;
     if ((ret = read_group_vars(ncid, ngroups, group)))
 	ERR;
-    free(group);
-    
-    /* Read the flash vars. */
-    if (!(flash = malloc(nflashes * sizeof(GLM_FLASH_T))))
-	ERR;
     if ((ret = read_flash_vars(ncid, nflashes, flash)))
 	ERR;
-    free(flash);
-
-    /* Read the scalar and small vars. */
-    GLM_SCALAR_T glm_scalar;
     if ((ret = read_scalars(ncid, &glm_scalar)))
 	ERR;
 
@@ -859,6 +852,11 @@ glm_read_file(char *file_name, int verbose)
     if ((ret = nc_close(ncid)))
 	NC_ERR(ret);
 
+    /* Free memory. */
+    free(event);
+    free(group);
+    free(flash);
+    
     return 0;
 }
 

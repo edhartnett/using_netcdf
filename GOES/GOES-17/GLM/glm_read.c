@@ -530,7 +530,7 @@ read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
 }
 
 int
-read_dims(int ncid, int *event_dimid, int *group_dimid, int *flash_dimid)
+read_dims(int ncid, int *nevents, int *ngroups, int *nflashes)
 {
     return 0;
 }

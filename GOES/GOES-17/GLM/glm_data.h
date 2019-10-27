@@ -91,7 +91,7 @@ typedef struct GLM_GROUP
     unsigned int lat;
     unsigned int lon;
     unsigned int energy;
-    unsigned int parent_group_id;
+    unsigned int parent_flash_id;
 } GLM_GROUP_T;
 
 typedef struct GLM_FLASH

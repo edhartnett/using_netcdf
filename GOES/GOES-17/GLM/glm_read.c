@@ -202,6 +202,13 @@ read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
     short *group_area = NULL, *group_energy = NULL, *group_parent_flash_id = NULL;
     short *group_quality_flag = NULL;
 
+    /* Scale factors and offsets. */
+    float group_time_offset_scale, group_time_offset_offset;
+    float group_frame_time_offset_scale, group_frame_time_offset_offset;
+    float group_area_scale, group_area_offset;
+    float group_energy_scale, group_energy_offset;
+
+    int i;
     int ret;
 
     /* Allocate storeage for group variables. */
@@ -221,26 +228,54 @@ read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
 	ERR;
     if (!(group_parent_flash_id = malloc(ngroups * sizeof(short))))
 	ERR;
-    if (!(group_quality_flag = malloc(ngroups * sizeof(int))))
+    if (!(group_quality_flag = malloc(ngroups * sizeof(short))))
 	ERR;
 
     /* Find the varids for the group variables. */
     if ((ret = nc_inq_varid(ncid, GROUP_ID, &group_id_varid)))
 	NC_ERR(ret);
+
     if ((ret = nc_inq_varid(ncid, GROUP_TIME_OFFSET, &group_time_offset_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, group_time_offset_varid, SCALE_FACTOR, &group_time_offset_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, group_time_offset_varid, ADD_OFFSET, &group_time_offset_offset)))
+	NC_ERR(ret);
+
     if ((ret = nc_inq_varid(ncid, GROUP_FRAME_TIME_OFFSET, &group_frame_time_offset_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, group_frame_time_offset_varid, SCALE_FACTOR, &group_frame_time_offset_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, group_frame_time_offset_varid, ADD_OFFSET, &group_frame_time_offset_offset)))
+	NC_ERR(ret);
+
+    /* group_lat is not packed. */
     if ((ret = nc_inq_varid(ncid, GROUP_LAT, &group_lat_varid)))
 	NC_ERR(ret);
+
+    /* group_lon is not packed. */
     if ((ret = nc_inq_varid(ncid, GROUP_LON, &group_lon_varid)))
 	NC_ERR(ret);
+
     if ((ret = nc_inq_varid(ncid, GROUP_AREA, &group_area_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, group_area_varid, SCALE_FACTOR, &group_area_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, group_area_varid, ADD_OFFSET, &group_area_offset)))
+	NC_ERR(ret);
+
     if ((ret = nc_inq_varid(ncid, GROUP_ENERGY, &group_energy_varid)))
 	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, group_energy_varid, SCALE_FACTOR, &group_energy_scale)))
+	NC_ERR(ret);
+    if ((ret = nc_get_att_float(ncid, group_energy_varid, ADD_OFFSET, &group_energy_offset)))
+	NC_ERR(ret);
+
+    /* group_parent_flash_id is not packed. */
     if ((ret = nc_inq_varid(ncid, GROUP_PARENT_FLASH_ID, &group_parent_flash_id_varid)))
 	NC_ERR(ret);
+
+    /* group_quality_flag is not packed. */
     if ((ret = nc_inq_varid(ncid, GROUP_QUALITY_FLAG, &group_quality_flag_varid)))
 	NC_ERR(ret);
 
@@ -263,6 +298,18 @@ read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
     	NC_ERR(ret);
     if ((ret = nc_get_var_short(ncid, group_quality_flag_varid, group_quality_flag)))
     	NC_ERR(ret);
+
+    /* Unpack the data into our already-allocated array of struct
+     * GLM_GROUP. */
+    for (i = 0; i < ngroups; i++)
+    {
+	group[i].id = group_id[i];
+	group[i].time_offset = (float)group_time_offset[i]/group_time_offset_scale + group_time_offset_offset;
+	group[i].lat = group_lat[i];
+	group[i].lon = group_lon[i];
+	group[i].energy = (float)group_energy[i]/group_energy_scale + group_energy_offset;
+	group[i].parent_flash_id = group_parent_flash_id[i];
+    }
 
     /* Free group storage. */
     if (group_id)

@@ -110,4 +110,9 @@ typedef struct GLM_FLASH
     short quality_flag;
 } GLM_FLASH_T;
 
+typedef struct GLM_SCALAR
+{
+    double product_time;
+} GLM_SCALAR_T;
+
 #endif /* _UN_GLM_DATA_H */

@@ -530,7 +530,60 @@ read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
 }
 
 int
-read_dims(int ncid, int *nevents, int *ngroups, int *nflashes)
+read_dims(int ncid, size_t *nevents, size_t *ngroups, size_t *nflashes)
+{
+    /* Dimensions and their lengths. */
+    int event_dimid, group_dimid, flash_dimid;
+    int number_of_time_bounds_dimid;
+    int number_of_field_of_view_bounds_dimid;
+    int number_of_wavelength_bounds_dimid;
+    size_t ntime_bounds, nfov_bounds, nwl_bounds;
+    int ret;
+
+    /* Check inputs. */
+    assert(ncid > 0 && nevents && ngroups && nflashes);
+
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_FLASHES, &flash_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, flash_dimid, nflashes)))
+	NC_ERR(ret);
+    
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_GROUPS, &group_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, group_dimid, ngroups)))
+	NC_ERR(ret);
+
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_EVENTS, &event_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, event_dimid, nevents)))
+	NC_ERR(ret);
+
+    /* This dimension will always be length 2. */
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_TIME_BOUNDS, &number_of_time_bounds_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, number_of_time_bounds_dimid, &ntime_bounds)))
+	NC_ERR(ret);
+    assert(ntime_bounds == EXTRA_DIM_LEN);
+
+    /* This dimension will always be length 2. */
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_FIELD_OF_VIEW_BOUNDS, &number_of_field_of_view_bounds_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, number_of_field_of_view_bounds_dimid, &nfov_bounds)))
+	NC_ERR(ret);
+    assert(nfov_bounds == EXTRA_DIM_LEN);
+
+    /* This dimension will always be length 2. */
+    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_WAVELENGTH_BOUNDS, &number_of_wavelength_bounds_dimid)))
+	NC_ERR(ret);
+    if ((ret = nc_inq_dimlen(ncid, number_of_wavelength_bounds_dimid, &nwl_bounds)))
+	NC_ERR(ret);
+    assert(nwl_bounds == EXTRA_DIM_LEN);
+
+    return 0;
+}
+
+int
+read_scalars(int ncid, GLM_SCALAR_T *glm_scalar)
 {
     return 0;
 }
@@ -586,13 +639,7 @@ glm_read_file(char *file_name, int verbose)
 {
     int ncid;
 
-    /* Dimensions and their lengths. */
-    int event_dimid, group_dimid, flash_dimid;
-    int number_of_time_bounds_dimid;
-    int number_of_field_of_view_bounds_dimid;
-    int number_of_wavelength_bounds_dimid;
     size_t nevents, ngroups, nflashes;
-    size_t ntime_bounds, nfov_bounds, nwl_bounds;
 
     /* Structs of events, groups, flashes. */
     GLM_EVENT_T *event;
@@ -619,42 +666,9 @@ glm_read_file(char *file_name, int verbose)
     }
 
     /* Read the size of the dimensions. */
-    if ((ret = read_dims(ncid, &event_dimid, &group_dimid, &flash_dimid)))
+    if ((ret = read_dims(ncid, &nevents, &ngroups, &nflashes)))
 	ERR;
     
-    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_FLASHES, &flash_dimid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_dimlen(ncid, flash_dimid, &nflashes)))
-	NC_ERR(ret);
-    
-    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_GROUPS, &group_dimid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_dimlen(ncid, group_dimid, &ngroups)))
-	NC_ERR(ret);
-
-    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_EVENTS, &event_dimid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_dimlen(ncid, event_dimid, &nevents)))
-	NC_ERR(ret);
-
-    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_TIME_BOUNDS, &number_of_time_bounds_dimid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_dimlen(ncid, number_of_time_bounds_dimid, &ntime_bounds)))
-	NC_ERR(ret);
-    assert(ntime_bounds == EXTRA_DIM_LEN);
-
-    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_FIELD_OF_VIEW_BOUNDS, &number_of_field_of_view_bounds_dimid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_dimlen(ncid, number_of_field_of_view_bounds_dimid, &nfov_bounds)))
-	NC_ERR(ret);
-    assert(nfov_bounds == EXTRA_DIM_LEN);
-
-    if ((ret = nc_inq_dimid(ncid, NUMBER_OF_WAVELENGTH_BOUNDS, &number_of_wavelength_bounds_dimid)))
-	NC_ERR(ret);
-    if ((ret = nc_inq_dimlen(ncid, number_of_wavelength_bounds_dimid, &nwl_bounds)))
-	NC_ERR(ret);
-    assert(nwl_bounds == EXTRA_DIM_LEN);
-
     if (verbose)
 	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
 	       ngroups, nevents);
@@ -679,6 +693,11 @@ glm_read_file(char *file_name, int verbose)
     if ((ret = read_flash_vars(ncid, nflashes, flash)))
 	ERR;
     free(flash);
+
+    /* Read the scalar and small vars. */
+    GLM_SCALAR_T glm_scalar;
+    if ((ret = read_scalars(ncid, &glm_scalar)))
+	ERR;
     
     int product_time_varid;
     double product_time;

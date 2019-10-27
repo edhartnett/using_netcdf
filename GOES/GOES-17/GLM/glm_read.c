@@ -17,7 +17,7 @@
 #include <assert.h>
 #include <netcdf.h>
 #include "un_test.h"
-#include "un_glm_data.h"
+#include "glm_data.h"
 
 /* Attribute names. */
 #define TITLE "title"

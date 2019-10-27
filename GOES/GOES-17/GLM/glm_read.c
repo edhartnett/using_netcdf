@@ -66,7 +66,7 @@ show_att(int ncid, int varid, char *name)
 /* Read and unpack all the event data in the file. It will be loaded
  * into the pre-allocated array of struct event. */
 int
-read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
+read_event_vars(int ncid, int nevents, GLM_EVENT_T *event)
 {
     /* Event varids. */
     int event_id_varid;
@@ -157,7 +157,7 @@ read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
 	NC_ERR(ret);
 
     /* Unpack the data into our already-allocated array of struct
-     * UN_GLM_EVENT. */
+     * GLM_EVENT. */
     for (i = 0; i < nevents; i++)
     {
 	event[i].id = event_id[i];
@@ -182,6 +182,22 @@ read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
     if (event_parent_group_id)
 	free(event_parent_group_id);
   
+    return 0;
+}
+
+/* Read and unpack all the group data in the file. It will be loaded
+ * into the pre-allocated array of struct group. */
+int
+read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
+{
+    return 0;
+}
+
+/* Read and unpack all the flash data in the file. It will be loaded
+ * into the pre-allocated array of struct flash. */
+int
+read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
+{
     return 0;
 }
 
@@ -275,6 +291,11 @@ glm_read_file(char *file_name, int verbose)
     short *flash_area = NULL, *flash_energy = NULL;
     short *flash_quality_flag = NULL;
 
+    /* Structs of events, groups, flashes. */
+    GLM_EVENT_T *event;
+    GLM_GROUP_T *group;
+    GLM_FLASH_T *flash;
+
     int ret;
     
     /* Open the data file as read-only. */
@@ -333,12 +354,25 @@ glm_read_file(char *file_name, int verbose)
 	       ngroups, nevents);
 
     /* Read the event vars. */
-    UN_GLM_EVENT_T *event;
-    if (!(event = malloc(nevents * sizeof(UN_GLM_EVENT_T))))
+    if (!(event = malloc(nevents * sizeof(GLM_EVENT_T))))
 	ERR;
     if ((ret = read_event_vars(ncid, nevents, event)))
 	ERR;
     free(event);
+    
+    /* Read the event vars. */
+    if (!(group = malloc(ngroups * sizeof(GLM_GROUP_T))))
+	ERR;
+    if ((ret = read_group_vars(ncid, ngroups, group)))
+	ERR;
+    free(group);
+    
+    /* Read the flash vars. */
+    if (!(flash = malloc(nflashes * sizeof(GLM_FLASH_T))))
+	ERR;
+    if ((ret = read_flash_vars(ncid, nflashes, flash)))
+	ERR;
+    free(flash);
     
     /* Allocate storeage for group variables. */
     if (!(group_id = malloc(ngroups * sizeof(int))))

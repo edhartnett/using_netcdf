@@ -74,7 +74,7 @@
 #define SCALE_FACTOR "scale_factor"
 #define ADD_OFFSET "add_offset"
 
-typedef struct UN_GLM_EVENT
+typedef struct GLM_EVENT
 {
     int id;
     unsigned int time_offset;
@@ -82,6 +82,25 @@ typedef struct UN_GLM_EVENT
     unsigned int lon;
     unsigned int energy;
     unsigned int parent_group_id;
-} UN_GLM_EVENT_T;
+} GLM_EVENT_T;
+
+typedef struct GLM_GROUP
+{
+    int id;
+    unsigned int time_offset;
+    unsigned int lat;
+    unsigned int lon;
+    unsigned int energy;
+    unsigned int parent_group_id;
+} GLM_GROUP_T;
+
+typedef struct GLM_FLASH
+{
+    int id;
+    unsigned int time_offset;
+    unsigned int lat;
+    unsigned int lon;
+    unsigned int energy;
+} GLM_FLASH_T;
 
 #endif /* _UN_GLM_DATA_H */

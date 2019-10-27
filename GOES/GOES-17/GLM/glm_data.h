@@ -110,4 +110,31 @@ typedef struct GLM_FLASH
     short quality_flag;
 } GLM_FLASH_T;
 
+typedef struct GLM_SCALAR
+{
+    double product_time;
+    double product_time_bounds[EXTRA_DIM_LEN];
+    float lightning_wavelength;
+    float lightning_wavelength_bounds[EXTRA_DIM_LEN];
+    float group_time_threshold;
+    float flash_time_threshold;
+    float lat_field_of_view;
+    float lat_field_of_view_bounds[EXTRA_DIM_LEN];
+    int goes_lat_lon_projection;
+    int event_count;
+    int group_count;
+    int flash_count;
+    float percent_navigated_L1b_events;
+    signed char yaw_flip_flag;
+    float nominal_satellite_subpoint_lat;
+    float nominal_satellite_height;
+    float nominal_satellite_subpoint_lon;
+    float lon_field_of_view;
+    float lon_field_of_view_bounds[EXTRA_DIM_LEN];
+    float percent_uncorrectable_L0_errors;
+    int algorithm_dynamic_input_data_container;
+    int processing_parm_version_container;
+    int algorithm_product_version_container;
+} GLM_SCALAR_T;
+
 #endif /* _UN_GLM_DATA_H */

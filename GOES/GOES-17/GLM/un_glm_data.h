@@ -70,4 +70,14 @@
 #define PROCESSING_PARM_VERSION_CONTAINER "processing_parm_version_container"
 #define ALGORITHM_PRODUCT_VERSION_CONTAINER "algorithm_product_version_container"
 
+typedef struct UN_GLM_EVENT
+{
+    int id;
+    unsigned int time_offset;
+    unsigned int lat;
+    unsigned int lon;
+    unsigned int energy;
+    unsigned int parent_group_id;
+} UN_GLM_EVENT_T;
+
 #endif /* _UN_GLM_DATA_H */

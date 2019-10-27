@@ -27,7 +27,6 @@
 /* Number of timing runs when -t option is used. */
 #define NUM_TRIALS 10
 
-
 /* Usage description. */
 #define USAGE   "\
   [-v]        Verbose\n\
@@ -65,7 +64,7 @@ show_att(int ncid, int varid, char *name)
 }
 
 int
-read_event_vars(int ncid, int nevents)
+read_event_vars(int ncid, int nevents, UN_GLM_EVENT_T *event)
 {
     /* Events. */
     int event_id_varid;
@@ -284,8 +283,12 @@ glm_read_file(char *file_name, int verbose)
 	       ngroups, nevents);
 
     /* Read the event vars. */
-    if ((ret = read_event_vars(ncid, nevents)))
+    UN_GLM_EVENT_T *event;
+    if (!(event = malloc(nevents * sizeof(UN_GLM_EVENT_T))))
 	ERR;
+    if ((ret = read_event_vars(ncid, nevents, event)))
+	ERR;
+    free(event);
     
     /* Allocate storeage for group variables. */
     if (!(group_id = malloc(ngroups * sizeof(int))))

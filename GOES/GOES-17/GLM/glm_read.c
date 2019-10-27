@@ -585,120 +585,6 @@ read_dims(int ncid, size_t *nevents, size_t *ngroups, size_t *nflashes)
 int
 read_scalars(int ncid, GLM_SCALAR_T *glm_scalar)
 {
-    return 0;
-}
-
-/*
-  From GOES R SERIESPRODUCT DEFINITION AND USERS’ GUIDE(PUG) Vol 3
-  (https://www.goes-r.gov/users/docs/PUG-L1b-vol3.pdf)
-
-  The classic model for netCDF (used by the GS) does not support
-  unsigned integers larger than 8 bits.  Many of the variables in
-  GOES-R netCDF files are unsigned integers of 16-bit or 32-bit
-  length.  The following process is recommended to convert these
-  unsigned integers:
-
-  1.Retrieve the variable data from the netCDF file.
-
-  2.For this variable, retrieve the attribute “_Unsigned”.
-
-  3.If the “_Unsigned” attribute is set to “true” or “True”, then
-  cast the variable data to be unsigned.
-
-  The steps above must be completed before applying the
-  scale_factor and add_offset values to convert from scaled
-  integer to science units.  Also, the valid_range and _FillValue
-  attribute values are to be governed by the “_Unsigned” attribute
-
-  From a netCDF group email:
-  https://www.unidata.ucar.edu/mailing_lists/archives/netcdfgroup/2002/msg00034.html
-
-  Normally you store a group of numbers, all with the same scale
-  and offset. So first you calculate the min and max of that group
-  of numbers. Also let max_integer = maximum integer (eg for
-  INTEGER*2 this equals 32,167).
-
-  then
-  offset = min
-  scale = max_integer / (max - min)
-
-  store this number into netcdf file:
-
-  store_x = (x - offset) * scale = max_integer * (x - min) / (max - min)
-
-  note that when x = min, store_x = 0, and when x = max, store_x
-  max_integer.
-
-  the reading program should use the formula
-
-  x = store_x/scale + offset.
-
-*/
-int
-glm_read_file(char *file_name, int verbose)
-{
-    int ncid;
-
-    size_t nevents, ngroups, nflashes;
-
-    /* Structs of events, groups, flashes. */
-    GLM_EVENT_T *event;
-    GLM_GROUP_T *group;
-    GLM_FLASH_T *flash;
-
-    int ret;
-    
-    /* Open the data file as read-only. */
-    if ((ret = nc_open(file_name, NC_NOWRITE, &ncid)))
-	NC_ERR(ret);
-
-    /* Optionally display some of the global attributes. The GLM data
-     * files comply with the CF Conventions, and other metadata
-     * standards. */
-    if (verbose)
-    {
-	if (show_att(ncid, NC_GLOBAL, TITLE))
-	    ERR;
-	if (show_att(ncid, NC_GLOBAL, PLATFORM_ID))
-	    ERR;
-	if (show_att(ncid, NC_GLOBAL, SUMMARY))
-	    ERR;
-    }
-
-    /* Read the size of the dimensions. */
-    if ((ret = read_dims(ncid, &nevents, &ngroups, &nflashes)))
-	ERR;
-    
-    if (verbose)
-	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
-	       ngroups, nevents);
-
-    /* Read the event vars. */
-    if (!(event = malloc(nevents * sizeof(GLM_EVENT_T))))
-	ERR;
-    if ((ret = read_event_vars(ncid, nevents, event)))
-	ERR;
-    free(event);
-    
-    /* Read the group vars. */
-    if (!(group = malloc(ngroups * sizeof(GLM_GROUP_T))))
-	ERR;
-    if ((ret = read_group_vars(ncid, ngroups, group)))
-	ERR;
-    free(group);
-    
-    /* Read the flash vars. */
-    if (!(flash = malloc(nflashes * sizeof(GLM_FLASH_T))))
-	ERR;
-    if ((ret = read_flash_vars(ncid, nflashes, flash)))
-	ERR;
-    free(flash);
-
-    /* Read the scalar and small vars. */
-    GLM_SCALAR_T glm_scalar;
-    if ((ret = read_scalars(ncid, &glm_scalar)))
-	ERR;
-    
     int product_time_varid;
     double product_time;
     int product_time_bounds_varid;
@@ -745,6 +631,7 @@ glm_read_file(char *file_name, int verbose)
     int processing_parm_version_container;
     int algorithm_product_version_container_varid;
     int algorithm_product_version_container;
+    int ret;
 
     /* Get varids and values of scalars and small vars. */
     if ((ret = nc_inq_varid(ncid, PRODUCT_TIME, &product_time_varid)))
@@ -877,6 +764,119 @@ glm_read_file(char *file_name, int verbose)
 			      &algorithm_product_version_container)))
     	NC_ERR(ret);
 
+    return 0;
+}
+
+/*
+  From GOES R SERIESPRODUCT DEFINITION AND USERS’ GUIDE(PUG) Vol 3
+  (https://www.goes-r.gov/users/docs/PUG-L1b-vol3.pdf)
+
+  The classic model for netCDF (used by the GS) does not support
+  unsigned integers larger than 8 bits.  Many of the variables in
+  GOES-R netCDF files are unsigned integers of 16-bit or 32-bit
+  length.  The following process is recommended to convert these
+  unsigned integers:
+
+  1.Retrieve the variable data from the netCDF file.
+
+  2.For this variable, retrieve the attribute “_Unsigned”.
+
+  3.If the “_Unsigned” attribute is set to “true” or “True”, then
+  cast the variable data to be unsigned.
+
+  The steps above must be completed before applying the
+  scale_factor and add_offset values to convert from scaled
+  integer to science units.  Also, the valid_range and _FillValue
+  attribute values are to be governed by the “_Unsigned” attribute
+
+  From a netCDF group email:
+  https://www.unidata.ucar.edu/mailing_lists/archives/netcdfgroup/2002/msg00034.html
+
+  Normally you store a group of numbers, all with the same scale
+  and offset. So first you calculate the min and max of that group
+  of numbers. Also let max_integer = maximum integer (eg for
+  INTEGER*2 this equals 32,167).
+
+  then
+  offset = min
+  scale = max_integer / (max - min)
+
+  store this number into netcdf file:
+
+  store_x = (x - offset) * scale = max_integer * (x - min) / (max - min)
+
+  note that when x = min, store_x = 0, and when x = max, store_x
+  max_integer.
+
+  the reading program should use the formula
+
+  x = store_x/scale + offset.
+
+*/
+int
+glm_read_file(char *file_name, int verbose)
+{
+    int ncid;
+
+    size_t nevents, ngroups, nflashes;
+
+    /* Structs of events, groups, flashes. */
+    GLM_EVENT_T *event;
+    GLM_GROUP_T *group;
+    GLM_FLASH_T *flash;
+
+    int ret;
+    
+    /* Open the data file as read-only. */
+    if ((ret = nc_open(file_name, NC_NOWRITE, &ncid)))
+	NC_ERR(ret);
+
+    /* Optionally display some of the global attributes. The GLM data
+     * files comply with the CF Conventions, and other metadata
+     * standards. */
+    if (verbose)
+    {
+	if (show_att(ncid, NC_GLOBAL, TITLE))
+	    ERR;
+	if (show_att(ncid, NC_GLOBAL, PLATFORM_ID))
+	    ERR;
+	if (show_att(ncid, NC_GLOBAL, SUMMARY))
+	    ERR;
+    }
+
+    /* Read the size of the dimensions. */
+    if ((ret = read_dims(ncid, &nevents, &ngroups, &nflashes)))
+	ERR;
+    
+    if (verbose)
+	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
+	       ngroups, nevents);
+
+    /* Read the event vars. */
+    if (!(event = malloc(nevents * sizeof(GLM_EVENT_T))))
+	ERR;
+    if ((ret = read_event_vars(ncid, nevents, event)))
+	ERR;
+    free(event);
+    
+    /* Read the group vars. */
+    if (!(group = malloc(ngroups * sizeof(GLM_GROUP_T))))
+	ERR;
+    if ((ret = read_group_vars(ncid, ngroups, group)))
+	ERR;
+    free(group);
+    
+    /* Read the flash vars. */
+    if (!(flash = malloc(nflashes * sizeof(GLM_FLASH_T))))
+	ERR;
+    if ((ret = read_flash_vars(ncid, nflashes, flash)))
+	ERR;
+    free(flash);
+
+    /* Read the scalar and small vars. */
+    GLM_SCALAR_T glm_scalar;
+    if ((ret = read_scalars(ncid, &glm_scalar)))
+	ERR;
 
     /* Close the data file. */
     if ((ret = nc_close(ncid)))

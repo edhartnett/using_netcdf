@@ -586,182 +586,159 @@ int
 read_scalars(int ncid, GLM_SCALAR_T *glm_scalar)
 {
     int product_time_varid;
-    double product_time;
     int product_time_bounds_varid;
-    double product_time_bounds[EXTRA_DIM_LEN];
     int lightning_wavelength_varid;
-    float lightning_wavelength;
     int lightning_wavelength_bounds_varid;
-    float lightning_wavelength_bounds[EXTRA_DIM_LEN];
     int group_time_threshold_varid;
-    float group_time_threshold;
     int flash_time_threshold_varid;
-    float flash_time_threshold;
     int lat_field_of_view_varid;
-    float lat_field_of_view;
     int lat_field_of_view_bounds_varid;
-    float lat_field_of_view_bounds[EXTRA_DIM_LEN];
     int goes_lat_lon_projection_varid;
-    int goes_lat_lon_projection;
     int event_count_varid;
-    int event_count;
     int group_count_varid;
-    int group_count;
     int flash_count_varid;
-    int flash_count;
     int percent_navigated_L1b_events_varid;
-    float percent_navigated_L1b_events;
     int yaw_flip_flag_varid;
-    signed char yaw_flip_flag;
     int nominal_satellite_subpoint_lat_varid;
-    float nominal_satellite_subpoint_lat;
     int nominal_satellite_height_varid;
-    float nominal_satellite_height;
     int nominal_satellite_subpoint_lon_varid;
-    float nominal_satellite_subpoint_lon;
     int lon_field_of_view_varid;
-    float lon_field_of_view;
     int lon_field_of_view_bounds_varid;
-    float lon_field_of_view_bounds[EXTRA_DIM_LEN];
     int percent_uncorrectable_L0_errors_varid;
-    float percent_uncorrectable_L0_errors;
     int algorithm_dynamic_input_data_container_varid;
-    int algorithm_dynamic_input_data_container;
     int processing_parm_version_container_varid;
-    int processing_parm_version_container;
     int algorithm_product_version_container_varid;
-    int algorithm_product_version_container;
     int ret;
 
     /* Get varids and values of scalars and small vars. */
     if ((ret = nc_inq_varid(ncid, PRODUCT_TIME, &product_time_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_double(ncid, product_time_varid, &product_time)))
+    if ((ret = nc_get_var_double(ncid, product_time_varid, &glm_scalar->product_time)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, PRODUCT_TIME_BOUNDS, &product_time_bounds_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_double(ncid, product_time_bounds_varid, product_time_bounds)))
+    if ((ret = nc_get_var_double(ncid, product_time_bounds_varid, glm_scalar->product_time_bounds)))
     	NC_ERR(ret);
     
     if ((ret = nc_inq_varid(ncid, LIGHTNING_WAVELENGTH, &lightning_wavelength_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, lightning_wavelength_varid, &lightning_wavelength)))
+    if ((ret = nc_get_var_float(ncid, lightning_wavelength_varid, &glm_scalar->lightning_wavelength)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, LIGHTNING_WAVELENGTH_BOUNDS, &lightning_wavelength_bounds_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, lightning_wavelength_bounds_varid, lightning_wavelength_bounds)))
+    if ((ret = nc_get_var_float(ncid, lightning_wavelength_bounds_varid, glm_scalar->lightning_wavelength_bounds)))
     	NC_ERR(ret);
     
     if ((ret = nc_inq_varid(ncid, GROUP_TIME_THRESHOLD, &group_time_threshold_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, group_time_threshold_varid, &group_time_threshold)))
+    if ((ret = nc_get_var_float(ncid, group_time_threshold_varid, &glm_scalar->group_time_threshold)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, FLASH_TIME_THRESHOLD, &flash_time_threshold_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, flash_time_threshold_varid, &flash_time_threshold)))
+    if ((ret = nc_get_var_float(ncid, flash_time_threshold_varid, &glm_scalar->flash_time_threshold)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, LAT_FIELD_OF_VIEW, &lat_field_of_view_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, lat_field_of_view_varid, &lat_field_of_view)))
+    if ((ret = nc_get_var_float(ncid, lat_field_of_view_varid, &glm_scalar->lat_field_of_view)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, LAT_FIELD_OF_VIEW_BOUNDS, &lat_field_of_view_bounds_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, lat_field_of_view_bounds_varid, lat_field_of_view_bounds)))
+    if ((ret = nc_get_var_float(ncid, lat_field_of_view_bounds_varid, glm_scalar->lat_field_of_view_bounds)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, GOES_LAT_LON_PROJECTION, &goes_lat_lon_projection_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_int(ncid, goes_lat_lon_projection_varid, &goes_lat_lon_projection)))
+    if ((ret = nc_get_var_int(ncid, goes_lat_lon_projection_varid, &glm_scalar->goes_lat_lon_projection)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, EVENT_COUNT, &event_count_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_int(ncid, event_count_varid, &event_count)))
+    if ((ret = nc_get_var_int(ncid, event_count_varid, &glm_scalar->event_count)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, GROUP_COUNT, &group_count_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_int(ncid, group_count_varid, &group_count)))
+    if ((ret = nc_get_var_int(ncid, group_count_varid, &glm_scalar->group_count)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, FLASH_COUNT, &flash_count_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_int(ncid, flash_count_varid, &flash_count)))
+    if ((ret = nc_get_var_int(ncid, flash_count_varid, &glm_scalar->flash_count)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, PERCENT_NAVIGATED_L1B_EVENTS, &percent_navigated_L1b_events_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, percent_navigated_L1b_events_varid, &percent_navigated_L1b_events)))
+    if ((ret = nc_get_var_float(ncid, percent_navigated_L1b_events_varid, &glm_scalar->percent_navigated_L1b_events)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, YAW_FLIP_FLAG, &yaw_flip_flag_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_schar(ncid, yaw_flip_flag_varid, &yaw_flip_flag)))
+    if ((ret = nc_get_var_schar(ncid, yaw_flip_flag_varid, &glm_scalar->yaw_flip_flag)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, NOMINAL_SATELLITE_SUBPOINT_LAT, &nominal_satellite_subpoint_lat_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, nominal_satellite_subpoint_lat_varid, &nominal_satellite_subpoint_lat)))
+    if ((ret = nc_get_var_float(ncid, nominal_satellite_subpoint_lat_varid, &glm_scalar->nominal_satellite_subpoint_lat)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, NOMINAL_SATELLITE_HEIGHT, &nominal_satellite_height_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, nominal_satellite_height_varid, &nominal_satellite_height)))
+    if ((ret = nc_get_var_float(ncid, nominal_satellite_height_varid, &glm_scalar->nominal_satellite_height)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, NOMINAL_SATELLITE_SUBPOINT_LON, &nominal_satellite_subpoint_lon_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, nominal_satellite_subpoint_lon_varid, &nominal_satellite_subpoint_lon)))
+    if ((ret = nc_get_var_float(ncid, nominal_satellite_subpoint_lon_varid, &glm_scalar->nominal_satellite_subpoint_lon)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, LON_FIELD_OF_VIEW, &lon_field_of_view_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, lon_field_of_view_varid, &lon_field_of_view)))
+    if ((ret = nc_get_var_float(ncid, lon_field_of_view_varid, &glm_scalar->lon_field_of_view)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, LON_FIELD_OF_VIEW_BOUNDS, &lon_field_of_view_bounds_varid)))
 	NC_ERR(ret);
-    if ((ret = nc_get_var_float(ncid, lon_field_of_view_bounds_varid, lon_field_of_view_bounds)))
+    if ((ret = nc_get_var_float(ncid, lon_field_of_view_bounds_varid, glm_scalar->lon_field_of_view_bounds)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, PERCENT_UNCORRECTABLE_L0_ERRORS,
 			    &percent_uncorrectable_L0_errors_varid)))
 	NC_ERR(ret);
     if ((ret = nc_get_var_float(ncid, percent_uncorrectable_L0_errors_varid,
-				&percent_uncorrectable_L0_errors)))
+				&glm_scalar->percent_uncorrectable_L0_errors)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, ALGORITHM_DYNAMIC_INPUT_DATA_CONTAINER,
 			    &algorithm_dynamic_input_data_container_varid)))
 	NC_ERR(ret);
     if ((ret = nc_get_var_int(ncid, algorithm_dynamic_input_data_container_varid,
-			      &algorithm_dynamic_input_data_container)))
+			      &glm_scalar->algorithm_dynamic_input_data_container)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, PROCESSING_PARM_VERSION_CONTAINER,
 			    &processing_parm_version_container_varid)))
 	NC_ERR(ret);
     if ((ret = nc_get_var_int(ncid, processing_parm_version_container_varid,
-			      &processing_parm_version_container)))
+			      &glm_scalar->processing_parm_version_container)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, PROCESSING_PARM_VERSION_CONTAINER,
 			    &processing_parm_version_container_varid)))
 	NC_ERR(ret);
     if ((ret = nc_get_var_int(ncid, processing_parm_version_container_varid,
-			      &processing_parm_version_container)))
+			      &glm_scalar->processing_parm_version_container)))
     	NC_ERR(ret);
 
     if ((ret = nc_inq_varid(ncid, ALGORITHM_PRODUCT_VERSION_CONTAINER,
 			    &algorithm_product_version_container_varid)))
 	NC_ERR(ret);
     if ((ret = nc_get_var_int(ncid, algorithm_product_version_container_varid,
-			      &algorithm_product_version_container)))
+			      &glm_scalar->algorithm_product_version_container)))
     	NC_ERR(ret);
 
     return 0;

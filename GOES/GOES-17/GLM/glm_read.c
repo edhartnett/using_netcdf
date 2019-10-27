@@ -529,6 +529,12 @@ read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
     return 0;
 }
 
+int
+read_dims(int ncid, int *event_dimid, int *group_dimid, int *flash_dimid)
+{
+    return 0;
+}
+
 /*
   From GOES R SERIESPRODUCT DEFINITION AND USERS’ GUIDE(PUG) Vol 3
   (https://www.goes-r.gov/users/docs/PUG-L1b-vol3.pdf)
@@ -613,6 +619,9 @@ glm_read_file(char *file_name, int verbose)
     }
 
     /* Read the size of the dimensions. */
+    if ((ret = read_dims(ncid, &event_dimid, &group_dimid, &flash_dimid)))
+	ERR;
+    
     if ((ret = nc_inq_dimid(ncid, NUMBER_OF_FLASHES, &flash_dimid)))
 	NC_ERR(ret);
     if ((ret = nc_inq_dimlen(ncid, flash_dimid, &nflashes)))

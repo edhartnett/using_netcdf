@@ -12,7 +12,7 @@ TEST_EXTENSIONS = .sh
 # This is a libtool library.
 lib_LTLIBRARIES = libgoesglm.la
 libgoesglm_la_LDFLAGS = -version-info 0:0:0
-libgoesglm_la_SOURCES = glm_read.c goes_glm.h
+libgoesglm_la_SOURCES = glm_read.c goes_glm.h glm_data.h
 
 # Build our test program.
 check_PROGRAMS = tst_glm_read

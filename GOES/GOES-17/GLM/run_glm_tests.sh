@@ -16,3 +16,4 @@ done
 
 # Run the test.
 ./tst_glm_read -v
+

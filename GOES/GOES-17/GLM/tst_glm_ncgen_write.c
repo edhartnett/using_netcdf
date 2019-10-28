@@ -3,31 +3,6 @@
 #include <netcdf.h>
 
 
-static size_t event_id_chunksizes[1] = {256} ;
-static size_t event_time_offset_chunksizes[1] = {256} ;
-static size_t event_lat_chunksizes[1] = {256} ;
-static size_t event_lon_chunksizes[1] = {256} ;
-static size_t event_energy_chunksizes[1] = {256} ;
-static size_t event_parent_group_id_chunksizes[1] = {256} ;
-static size_t group_id_chunksizes[1] = {256} ;
-static size_t group_time_offset_chunksizes[1] = {256} ;
-static size_t group_frame_time_offset_chunksizes[1] = {256} ;
-static size_t group_lat_chunksizes[1] = {256} ;
-static size_t group_lon_chunksizes[1] = {256} ;
-static size_t group_area_chunksizes[1] = {256} ;
-static size_t group_energy_chunksizes[1] = {256} ;
-static size_t group_parent_flash_id_chunksizes[1] = {256} ;
-static size_t group_quality_flag_chunksizes[1] = {256} ;
-static size_t flash_id_chunksizes[1] = {256} ;
-static size_t flash_time_offset_of_first_event_chunksizes[1] = {256} ;
-static size_t flash_time_offset_of_last_event_chunksizes[1] = {256} ;
-static size_t flash_frame_time_offset_of_first_event_chunksizes[1] = {256} ;
-static size_t flash_frame_time_offset_of_last_event_chunksizes[1] = {256} ;
-static size_t flash_lat_chunksizes[1] = {256} ;
-static size_t flash_lon_chunksizes[1] = {256} ;
-static size_t flash_area_chunksizes[1] = {256} ;
-static size_t flash_energy_chunksizes[1] = {256} ;
-static size_t flash_quality_flag_chunksizes[1] = {256} ;
 
 void
 check_err(const int stat, const int line, const char *file) {
@@ -39,7 +14,7 @@ check_err(const int stat, const int line, const char *file) {
 }
 
 int
-main() {/* create ncdump.nc */
+main() {/* create ncdump2.nc */
 
     int  stat;  /* return status */
     int  ncid;  /* netCDF id */
@@ -195,9 +170,7 @@ main() {/* create ncdump.nc */
     int lon_field_of_view_bounds_dims[RANK_lon_field_of_view_bounds];
 
     /* enter define mode */
-    stat = nc_create("ncdump.nc", NC_CLOBBER|NC_NETCDF4, &ncid);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_put_att_text(ncid, NC_GLOBAL, "_Format", 1, "netCDF-4");
+    stat = nc_create("ncdump2.nc", NC_CLOBBER|NC_NETCDF4, &ncid);
     check_err(stat,__LINE__,__FILE__);
     OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp = ncid;
 
@@ -220,275 +193,143 @@ main() {/* create ncdump.nc */
     event_id_dims[0] = number_of_events_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "event_id", NC_INT, RANK_event_id, event_id_dims, &event_id_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_id_id, NC_CHUNKED, event_id_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_id_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     event_time_offset_dims[0] = number_of_events_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "event_time_offset", NC_SHORT, RANK_event_time_offset, event_time_offset_dims, &event_time_offset_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_time_offset_id, NC_CHUNKED, event_time_offset_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_time_offset_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     event_lat_dims[0] = number_of_events_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "event_lat", NC_SHORT, RANK_event_lat, event_lat_dims, &event_lat_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_lat_id, NC_CHUNKED, event_lat_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_lat_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     event_lon_dims[0] = number_of_events_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "event_lon", NC_SHORT, RANK_event_lon, event_lon_dims, &event_lon_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_lon_id, NC_CHUNKED, event_lon_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_lon_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     event_energy_dims[0] = number_of_events_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "event_energy", NC_SHORT, RANK_event_energy, event_energy_dims, &event_energy_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_energy_id, NC_CHUNKED, event_energy_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_energy_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     event_parent_group_id_dims[0] = number_of_events_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "event_parent_group_id", NC_INT, RANK_event_parent_group_id, event_parent_group_id_dims, &event_parent_group_id_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_parent_group_id_id, NC_CHUNKED, event_parent_group_id_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_parent_group_id_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     group_id_dims[0] = number_of_groups_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "group_id", NC_INT, RANK_group_id, group_id_dims, &group_id_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_id_id, NC_CHUNKED, group_id_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_id_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     group_time_offset_dims[0] = number_of_groups_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "group_time_offset", NC_SHORT, RANK_group_time_offset, group_time_offset_dims, &group_time_offset_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_time_offset_id, NC_CHUNKED, group_time_offset_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_time_offset_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     group_frame_time_offset_dims[0] = number_of_groups_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "group_frame_time_offset", NC_SHORT, RANK_group_frame_time_offset, group_frame_time_offset_dims, &group_frame_time_offset_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_frame_time_offset_id, NC_CHUNKED, group_frame_time_offset_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_frame_time_offset_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     group_lat_dims[0] = number_of_groups_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "group_lat", NC_FLOAT, RANK_group_lat, group_lat_dims, &group_lat_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_lat_id, NC_CHUNKED, group_lat_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_lat_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     group_lon_dims[0] = number_of_groups_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "group_lon", NC_FLOAT, RANK_group_lon, group_lon_dims, &group_lon_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_lon_id, NC_CHUNKED, group_lon_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_lon_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     group_area_dims[0] = number_of_groups_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "group_area", NC_SHORT, RANK_group_area, group_area_dims, &group_area_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_area_id, NC_CHUNKED, group_area_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_area_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     group_energy_dims[0] = number_of_groups_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "group_energy", NC_SHORT, RANK_group_energy, group_energy_dims, &group_energy_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_energy_id, NC_CHUNKED, group_energy_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_energy_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     group_parent_flash_id_dims[0] = number_of_groups_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "group_parent_flash_id", NC_SHORT, RANK_group_parent_flash_id, group_parent_flash_id_dims, &group_parent_flash_id_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_parent_flash_id_id, NC_CHUNKED, group_parent_flash_id_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_parent_flash_id_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     group_quality_flag_dims[0] = number_of_groups_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "group_quality_flag", NC_SHORT, RANK_group_quality_flag, group_quality_flag_dims, &group_quality_flag_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_quality_flag_id, NC_CHUNKED, group_quality_flag_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_quality_flag_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     flash_id_dims[0] = number_of_flashes_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_id", NC_SHORT, RANK_flash_id, flash_id_dims, &flash_id_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_id_id, NC_CHUNKED, flash_id_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_id_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     flash_time_offset_of_first_event_dims[0] = number_of_flashes_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_time_offset_of_first_event", NC_SHORT, RANK_flash_time_offset_of_first_event, flash_time_offset_of_first_event_dims, &flash_time_offset_of_first_event_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_time_offset_of_first_event_id, NC_CHUNKED, flash_time_offset_of_first_event_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_time_offset_of_first_event_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     flash_time_offset_of_last_event_dims[0] = number_of_flashes_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_time_offset_of_last_event", NC_SHORT, RANK_flash_time_offset_of_last_event, flash_time_offset_of_last_event_dims, &flash_time_offset_of_last_event_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_time_offset_of_last_event_id, NC_CHUNKED, flash_time_offset_of_last_event_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_time_offset_of_last_event_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     flash_frame_time_offset_of_first_event_dims[0] = number_of_flashes_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_frame_time_offset_of_first_event", NC_SHORT, RANK_flash_frame_time_offset_of_first_event, flash_frame_time_offset_of_first_event_dims, &flash_frame_time_offset_of_first_event_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_frame_time_offset_of_first_event_id, NC_CHUNKED, flash_frame_time_offset_of_first_event_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_frame_time_offset_of_first_event_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     flash_frame_time_offset_of_last_event_dims[0] = number_of_flashes_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_frame_time_offset_of_last_event", NC_SHORT, RANK_flash_frame_time_offset_of_last_event, flash_frame_time_offset_of_last_event_dims, &flash_frame_time_offset_of_last_event_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_frame_time_offset_of_last_event_id, NC_CHUNKED, flash_frame_time_offset_of_last_event_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_frame_time_offset_of_last_event_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     flash_lat_dims[0] = number_of_flashes_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_lat", NC_FLOAT, RANK_flash_lat, flash_lat_dims, &flash_lat_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_lat_id, NC_CHUNKED, flash_lat_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_lat_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     flash_lon_dims[0] = number_of_flashes_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_lon", NC_FLOAT, RANK_flash_lon, flash_lon_dims, &flash_lon_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_lon_id, NC_CHUNKED, flash_lon_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_lon_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     flash_area_dims[0] = number_of_flashes_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_area", NC_SHORT, RANK_flash_area, flash_area_dims, &flash_area_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_area_id, NC_CHUNKED, flash_area_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_area_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     flash_energy_dims[0] = number_of_flashes_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_energy", NC_SHORT, RANK_flash_energy, flash_energy_dims, &flash_energy_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_energy_id, NC_CHUNKED, flash_energy_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_energy_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     flash_quality_flag_dims[0] = number_of_flashes_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_quality_flag", NC_SHORT, RANK_flash_quality_flag, flash_quality_flag_dims, &flash_quality_flag_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_quality_flag_id, NC_CHUNKED, flash_quality_flag_chunksizes);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_quality_flag_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "product_time", NC_DOUBLE, RANK_product_time, 0, &product_time_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, product_time_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     product_time_bounds_dims[0] = number_of_time_bounds_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "product_time_bounds", NC_DOUBLE, RANK_product_time_bounds, product_time_bounds_dims, &product_time_bounds_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, product_time_bounds_id, NC_CONTIGUOUS, NULL);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, product_time_bounds_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "lightning_wavelength", NC_FLOAT, RANK_lightning_wavelength, 0, &lightning_wavelength_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, lightning_wavelength_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     lightning_wavelength_bounds_dims[0] = number_of_wavelength_bounds_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "lightning_wavelength_bounds", NC_FLOAT, RANK_lightning_wavelength_bounds, lightning_wavelength_bounds_dims, &lightning_wavelength_bounds_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, lightning_wavelength_bounds_id, NC_CONTIGUOUS, NULL);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, lightning_wavelength_bounds_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "group_time_threshold", NC_FLOAT, RANK_group_time_threshold, 0, &group_time_threshold_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_time_threshold_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_time_threshold", NC_FLOAT, RANK_flash_time_threshold, 0, &flash_time_threshold_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_time_threshold_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "lat_field_of_view", NC_FLOAT, RANK_lat_field_of_view, 0, &lat_field_of_view_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, lat_field_of_view_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     lat_field_of_view_bounds_dims[0] = number_of_field_of_view_bounds_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "lat_field_of_view_bounds", NC_FLOAT, RANK_lat_field_of_view_bounds, lat_field_of_view_bounds_dims, &lat_field_of_view_bounds_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, lat_field_of_view_bounds_id, NC_CONTIGUOUS, NULL);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, lat_field_of_view_bounds_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "goes_lat_lon_projection", NC_INT, RANK_goes_lat_lon_projection, 0, &goes_lat_lon_projection_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, goes_lat_lon_projection_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "event_count", NC_INT, RANK_event_count, 0, &event_count_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, event_count_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "group_count", NC_INT, RANK_group_count, 0, &group_count_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, group_count_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "flash_count", NC_INT, RANK_flash_count, 0, &flash_count_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, flash_count_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "percent_navigated_L1b_events", NC_FLOAT, RANK_percent_navigated_L1b_events, 0, &percent_navigated_L1b_events_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, percent_navigated_L1b_events_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "yaw_flip_flag", NC_BYTE, RANK_yaw_flip_flag, 0, &yaw_flip_flag_id);
@@ -496,50 +337,30 @@ main() {/* create ncdump.nc */
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "nominal_satellite_subpoint_lat", NC_FLOAT, RANK_nominal_satellite_subpoint_lat, 0, &nominal_satellite_subpoint_lat_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, nominal_satellite_subpoint_lat_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "nominal_satellite_height", NC_FLOAT, RANK_nominal_satellite_height, 0, &nominal_satellite_height_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, nominal_satellite_height_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "nominal_satellite_subpoint_lon", NC_FLOAT, RANK_nominal_satellite_subpoint_lon, 0, &nominal_satellite_subpoint_lon_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, nominal_satellite_subpoint_lon_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "lon_field_of_view", NC_FLOAT, RANK_lon_field_of_view, 0, &lon_field_of_view_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, lon_field_of_view_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     lon_field_of_view_bounds_dims[0] = number_of_field_of_view_bounds_dim;
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "lon_field_of_view_bounds", NC_FLOAT, RANK_lon_field_of_view_bounds, lon_field_of_view_bounds_dims, &lon_field_of_view_bounds_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_chunking(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, lon_field_of_view_bounds_id, NC_CONTIGUOUS, NULL);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, lon_field_of_view_bounds_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "percent_uncorrectable_L0_errors", NC_FLOAT, RANK_percent_uncorrectable_L0_errors, 0, &percent_uncorrectable_L0_errors_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, percent_uncorrectable_L0_errors_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "algorithm_dynamic_input_data_container", NC_INT, RANK_algorithm_dynamic_input_data_container, 0, &algorithm_dynamic_input_data_container_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, algorithm_dynamic_input_data_container_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "processing_parm_version_container", NC_INT, RANK_processing_parm_version_container, 0, &processing_parm_version_container_id);
     check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, processing_parm_version_container_id, NC_ENDIAN_LITTLE);
-    check_err(stat,__LINE__,__FILE__);
 
     stat = nc_def_var(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, "algorithm_product_version_container", NC_INT, RANK_algorithm_product_version_container, 0, &algorithm_product_version_container_id);
-    check_err(stat,__LINE__,__FILE__);
-    stat = nc_def_var_endian(OR_GLM_MINUS_L2_MINUS_LCFA_G17_s20192692359400_e20192700000000_c20192700000028_grp, algorithm_product_version_container_id, NC_ENDIAN_LITTLE);
     check_err(stat,__LINE__,__FILE__);
 
     /* assign global attributes */

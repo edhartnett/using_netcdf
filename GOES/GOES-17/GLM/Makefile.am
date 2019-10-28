@@ -22,10 +22,10 @@ tst_glm_read_SOURCES = tst_glm_read.c un_test.h tst_utils.c
 tst_glm_read_LDADD = libgoesglm.la
 
 # Run our test program.
-TESTS = tst_glm.sh 
+TESTS = run_glm_tests.sh 
 
 # Make sure this file is included in distribution.
-EXTRA_DIST = tst_glm.sh
+EXTRA_DIST = run_glm_tests.sh
 
 # Clean data files for distclean target.
 DISTCLEANFILES = *.nc

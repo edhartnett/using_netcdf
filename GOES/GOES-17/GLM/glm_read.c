@@ -825,7 +825,7 @@ glm_read_file(char *file_name, int verbose)
 	ERR;
     
     if (verbose)
-	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
+	printf("nflashes %ld ngroups %ld nevents %ld\n", nflashes,
 	       ngroups, nevents);
 
     /* Allocate storage. */

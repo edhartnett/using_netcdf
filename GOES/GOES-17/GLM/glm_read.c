@@ -1,11 +1,9 @@
 /*
-  Program to read data from the GOES-17 Global Lightning Mapper.
+  Code to read data from the GOES-17 Global Lightning Mapper.
 
   Ed Hartnett, 10/10/19
   Amsterdam
 */
-
-#define GLM_DATA_FILE "OR_GLM-L2-LCFA_G17_s20192692359400_e20192700000000_c20192700000028.nc"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -827,7 +825,7 @@ glm_read_file(char *file_name, int verbose)
 	ERR;
     
     if (verbose)
-	printf("nflashes %d ngroups %d nevents %d\n", nflashes,
+	printf("nflashes %ld ngroups %ld nevents %ld\n", nflashes,
 	       ngroups, nevents);
 
     /* Allocate storage. */
@@ -857,97 +855,5 @@ glm_read_file(char *file_name, int verbose)
     free(group);
     free(flash);
     
-    return 0;
-}
-
-int
-main(int argc, char **argv)
-{
-    int c;
-    int verbose = 0;
-    int timing = 0;
-    struct timeval start_time, end_time, diff_time;
-    int meta_read_us = 0, meta_max_read_us = 0, meta_min_read_us = NC_MAX_INT;
-    int meta_tot_read_us = 0, meta_avg_read_us;
-    int num_trials = 1;
-    char new_file[1024];
-    int t;
-    
-    while ((c = getopt(argc, argv, "vt")) != EOF)
-	switch(c)
-	{
-	case 'v':
-	    verbose++;
-	    break;
-	case 't':
-	    timing++;
-	    num_trials = NUM_TRIALS;
-	    break;
-	case '?':
-	    fprintf(stderr, "glm_read -v -h\n%s", USAGE);
-	    return 1;
-	}
-
-    if (verbose)
-	printf("Reading Geostationary Lightning Mapper data\n");
-
-    for (t = 0; t < num_trials; t++)
-    {
-	/* Clear all buffers. */
-	if (timing)
-	{
-	    char cmd[1024];
-	    char base_name[1024];
-	    size_t len;
-
-	    len = strlen(GLM_DATA_FILE) - 3;
-	    strncpy(base_name, GLM_DATA_FILE, len);
-	    base_name[len] = 0;
-	    sprintf(new_file, "%s_%d.nc", base_name, t);
-	    sprintf(cmd, "cp %s %s", GLM_DATA_FILE, new_file);
-	    system(cmd);
-	}
-	else
-	    strcpy(new_file, GLM_DATA_FILE);
-	
-	/* Start timer. */
-	if (gettimeofday(&start_time, NULL))
-	    ERR;
-
-	/* Read file. */
-	if (glm_read_file(new_file, verbose))
-	    ERR;
-
-	/* Handle timing. */
-	if (gettimeofday(&end_time, NULL)) ERR;
-	if (un_timeval_subtract(&diff_time, &end_time, &start_time)) ERR;
-	meta_read_us = (int)diff_time.tv_sec * MILLION + (int)diff_time.tv_usec;
-	if (meta_read_us > meta_max_read_us)
-	    meta_max_read_us = meta_read_us;
-	if (meta_read_us < meta_min_read_us)
-	    meta_min_read_us = meta_read_us;
-	meta_tot_read_us += meta_read_us;
-
-	if (timing)
-	{
-	    char cmd[1024];
-	    sprintf(cmd, "rm %s", new_file);
-	    system(cmd);
-	}
-	
-	/* if (verbose) */
-	printf("meta_read_us %d\n", meta_read_us);
-    }
-
-    if (timing)
-    {
-	meta_avg_read_us = meta_tot_read_us / NUM_TRIALS;
-	printf("meta_avg_read_us \t meta_min_read_us \t meta_max_read_us\n");
-	printf("%d\t\t\t\t%d\t\t\t\t%d\n", meta_avg_read_us, meta_min_read_us,
-	       meta_max_read_us);
-    }
-    
-    if (verbose)
-	printf("SUCCESS!\n");
     return 0;
 }

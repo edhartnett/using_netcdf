@@ -15,9 +15,9 @@ libgoesglm_la_LDFLAGS = -version-info 0:0:0
 libgoesglm_la_SOURCES = glm_read.c goes_glm.h glm_data.h
 
 # Build our test program.
-check_PROGRAMS = tst_glm_read
+check_PROGRAMS = tst_glm_read tst_glm_ncgen_write
 
-# Source code for the test.
+# Source code for the tests.
 tst_glm_read_SOURCES = tst_glm_read.c un_test.h tst_utils.c
 tst_glm_read_LDADD = libgoesglm.la
 

@@ -9,6 +9,19 @@
 
 #include "glm_data.h"
 
+#define GLM_ERR_TIMER 99
+#define GLM_ERR_MEMORY 100
+
+/* This macro prints an error message with line number and name of
+ * test program, and the netCDF error string. */
+#define NC_ERR(stat) do {						\
+        fflush(stdout); /* Make sure our stdout is synced with stderr. */ \
+        fprintf(stderr, "Sorry! Unexpected result, %s, line: %d %s\n",	\
+                __FILE__, __LINE__, nc_strerror(stat));			\
+        fflush(stderr);							\
+        return 2;							\
+    } while (0)
+
 #if defined(__cplusplus)
 extern "C" {
 #endif

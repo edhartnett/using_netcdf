@@ -55,5 +55,7 @@ AC_CONFIG_FILES([Makefile
 	GOES/Makefile
 	GOES/GOES-17/Makefile
 	GOES/GOES-17/GLM/Makefile
+	GOES/GOES-17/GLM/src/Makefile
+	GOES/GOES-17/GLM/test/Makefile
         ])
 AC_OUTPUT()

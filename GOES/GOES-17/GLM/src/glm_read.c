@@ -50,7 +50,8 @@ read_event_vars(int ncid, int nevents, GLM_EVENT_T *event)
 
     /* Storage for packed data. */
     int *event_id = NULL;
-    short *event_time_offset = NULL, *event_lat = NULL, *event_lon = NULL;
+    short *event_lat = NULL;
+    short *event_time_offset = NULL, *event_lon = NULL;
     short *event_energy = NULL;
     int *event_parent_group_id = NULL;
 
@@ -136,10 +137,10 @@ read_event_vars(int ncid, int nevents, GLM_EVENT_T *event)
     for (i = 0; i < nevents; i++)
     {
 	event[i].id = event_id[i];
-	event[i].time_offset = (float)event_time_offset[i]/event_time_offset_scale + event_time_offset_offset;
-	event[i].lat = (float)event_lat[i]/event_lat_scale + event_lat_offset;
-	event[i].lon = (float)event_lon[i]/event_lon_scale + event_lon_offset;
-	event[i].energy = (float)event_energy[i]/event_energy_scale + event_energy_offset;
+	event[i].time_offset = (float)((unsigned short)event_time_offset[i]) * event_time_offset_scale + event_time_offset_offset;
+	event[i].lat = (float)((unsigned short)event_lat[i]) * event_lat_scale + event_lat_offset;
+	event[i].lon = (float)((unsigned short)event_lon[i]) * event_lon_scale + event_lon_offset;
+	event[i].energy = (float)((unsigned short)event_energy[i]) * event_energy_scale + event_energy_offset;
 	event[i].parent_group_id = event_parent_group_id[i];
     }
 

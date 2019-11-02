@@ -18,10 +18,11 @@ AM_LDFLAGS = ${top_builddir}/GOES/GOES-17/GLM/src/libgoesglm.la
 LDADD = ${top_builddir}/GOES/GOES-17/GLM/src/libgoesglm.la
 
 # Build our test program.
-check_PROGRAMS = tst_glm_read tst_glm_ncgen_write
+check_PROGRAMS = tst_glm_read tst_glm_read_arrays tst_glm_ncgen_write
 
 # Source code for the tests.
 tst_glm_read_SOURCES = tst_glm_read.c un_test.h tst_utils.c
+tst_glm_read_arrays_SOURCES = tst_glm_read_arrays.c un_test.h tst_utils.c
 
 # Run our test program.
 TESTS = run_glm_tests.sh 

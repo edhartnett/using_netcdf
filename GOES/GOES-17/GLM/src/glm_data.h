@@ -78,9 +78,9 @@ typedef struct GLM_EVENT
 {
     int id;
     unsigned int time_offset;
-    unsigned int lat;
-    unsigned int lon;
-    unsigned int energy;
+    float lat;
+    float lon;
+    float energy;
     unsigned int parent_group_id;
 } GLM_EVENT_T;
 
@@ -90,8 +90,8 @@ typedef struct GLM_GROUP
     unsigned int time_offset;
     float lat;
     float lon;
-    unsigned int energy;
-    unsigned int area;
+    float energy;
+    float area;
     unsigned int parent_flash_id;
     short quality_flag;
 } GLM_GROUP_T;

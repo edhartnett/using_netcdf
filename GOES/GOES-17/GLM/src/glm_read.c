@@ -302,11 +302,11 @@ read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
     for (i = 0; i < ngroups; i++)
     {
 	group[i].id = group_id[i];
-	group[i].time_offset = (float)group_time_offset[i]/group_time_offset_scale + group_time_offset_offset;
+	group[i].time_offset = (float)((unsigned short)group_time_offset[i]) * group_time_offset_scale + group_time_offset_offset;
 	group[i].lat = group_lat[i];
 	group[i].lon = group_lon[i];
-	group[i].area = (float)group_area[i]/group_area_scale + group_area_offset;
-	group[i].energy = (float)group_energy[i]/group_energy_scale + group_energy_offset;
+	group[i].area = (float)((unsigned short)group_area[i]) * group_area_scale + group_area_offset;
+	group[i].energy = (float)((unsigned short)group_energy[i]) * group_energy_scale + group_energy_offset;
 	group[i].parent_flash_id = group_parent_flash_id[i];
 	group[i].quality_flag = group_quality_flag[i];
     }
@@ -487,18 +487,18 @@ read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
     for (i = 0; i < nflashes; i++)
     {
 	flash[i].id = flash_id[i];
-	flash[i].time_offset_of_first_event = (float)flash_time_offset_of_first_event[i]/flash_time_offset_of_first_event_scale +
-	    flash_time_offset_of_first_event_offset;
-	flash[i].time_offset_of_last_event = (float)flash_time_offset_of_last_event[i]/flash_time_offset_of_last_event_scale +
-	    flash_time_offset_of_last_event_offset;
-	flash[i].frame_time_offset_of_first_event = (float)flash_frame_time_offset_of_first_event[i]/flash_frame_time_offset_of_first_event_scale +
-	    flash_frame_time_offset_of_first_event_offset;
-	flash[i].frame_time_offset_of_last_event = (float)flash_frame_time_offset_of_last_event[i]/flash_frame_time_offset_of_last_event_scale +
-	    flash_frame_time_offset_of_last_event_offset;
+	flash[i].time_offset_of_first_event = (float)((unsigned short)flash_time_offset_of_first_event[i]) *
+	    flash_time_offset_of_first_event_scale + flash_time_offset_of_first_event_offset;
+	flash[i].time_offset_of_last_event = (float)((unsigned short)flash_time_offset_of_last_event[i]) *
+	    flash_time_offset_of_last_event_scale + flash_time_offset_of_last_event_offset;
+	flash[i].frame_time_offset_of_first_event = (float)((unsigned short)flash_frame_time_offset_of_first_event[i]) *
+	    flash_frame_time_offset_of_first_event_scale + flash_frame_time_offset_of_first_event_offset;
+	flash[i].frame_time_offset_of_last_event = (float)((unsigned short)flash_frame_time_offset_of_last_event[i]) *
+	    flash_frame_time_offset_of_last_event_scale + flash_frame_time_offset_of_last_event_offset;
 	flash[i].lat = flash_lat[i];
 	flash[i].lon = flash_lon[i];
-	flash[i].area = (float)flash_area[i]/flash_area_scale + flash_area_offset;
-	flash[i].energy = (float)flash_energy[i]/flash_energy_scale + flash_energy_offset;
+	flash[i].area = (float)((unsigned short)flash_area[i]) * flash_area_scale + flash_area_offset;
+	flash[i].energy = (float)((unsigned short)flash_energy[i]) * flash_energy_scale + flash_energy_offset;
 	flash[i].quality_flag = flash_quality_flag[i];
     }
 

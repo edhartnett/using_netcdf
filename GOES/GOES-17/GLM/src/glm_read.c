@@ -14,8 +14,7 @@
 #include <math.h>
 #include <assert.h>
 #include <netcdf.h>
-#include "un_test.h"
-#include "glm_data.h"
+#include "goes_glm.h"
 
 /* Attribute names. */
 #define TITLE "title"
@@ -29,37 +28,6 @@
 #define USAGE   "\
   [-v]        Verbose\n\
   [-t]        Perform timing runs\n"
-
-/* Read a text attribute and print its value. */
-int
-show_att(int ncid, int varid, char *name)
-{
-    char *value;
-    size_t att_len;
-    int ret;
-
-    /* How long is it? */
-    if ((ret = nc_inq_attlen(ncid, varid, name, &att_len)))
-	NC_ERR(ret);
-
-    /* Allocate storage. Add 1 for the C null terminator. */
-    if (!(value = malloc((att_len + 1) * sizeof(char))))
-	ERR;
-
-    /* Read the attribute value. */
-    if ((ret = nc_get_att_text(ncid, varid, name, value)))
-	NC_ERR(ret);
-
-    /* Add null terminator for C. */
-    value[att_len] = 0;
-
-    /* Print it. */
-    printf("%s: %s\n", name, value);
-
-    /* Free resources. */
-    free(value);
-    return 0;
-}
 
 /* Read and unpack all the event data in the file. It will be loaded
  * into the pre-allocated array of struct event. */
@@ -91,17 +59,17 @@ read_event_vars(int ncid, int nevents, GLM_EVENT_T *event)
 
     /* Allocate storeage for event variables. */
     if (!(event_id = malloc(nevents * sizeof(int))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(event_time_offset = malloc(nevents * sizeof(short))))
-	ERR;
+	return GLM_ERR_TIMER;
     if (!(event_lat = malloc(nevents * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(event_lon = malloc(nevents * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(event_energy = malloc(nevents * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(event_parent_group_id = malloc(nevents * sizeof(int))))
-	ERR;
+	return GLM_ERR_MEMORY;
 
     /* Find the varids for the event variables. Also get the scale
      * factors and offsets. */
@@ -211,23 +179,23 @@ read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
 
     /* Allocate storeage for group variables. */
     if (!(group_id = malloc(ngroups * sizeof(int))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(group_time_offset = malloc(ngroups * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(group_frame_time_offset = malloc(ngroups * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(group_lat = malloc(ngroups * sizeof(float))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(group_lon = malloc(ngroups * sizeof(float))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(group_area = malloc(ngroups * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(group_energy = malloc(ngroups * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(group_parent_flash_id = malloc(ngroups * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(group_quality_flag = malloc(ngroups * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
 
     /* Find the varids for the group variables. */
     if ((ret = nc_inq_varid(ncid, GROUP_ID, &group_id_varid)))
@@ -371,25 +339,25 @@ read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
 
     /* Allocate storeage for flash variables. */
     if (!(flash_id = malloc(nflashes * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(flash_time_offset_of_first_event = malloc(nflashes * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(flash_time_offset_of_last_event = malloc(nflashes * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(flash_frame_time_offset_of_first_event = malloc(nflashes * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(flash_frame_time_offset_of_last_event = malloc(nflashes * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(flash_lat = malloc(nflashes * sizeof(float))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(flash_lon = malloc(nflashes * sizeof(float))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(flash_area = malloc(nflashes * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(flash_energy = malloc(nflashes * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(flash_quality_flag = malloc(nflashes * sizeof(short))))
-	ERR;
+	return GLM_ERR_MEMORY;
 
     /* Find the varids for the flash variables. */
     if ((ret = nc_inq_varid(ncid, FLASH_ID, &flash_id_varid)))
@@ -813,38 +781,38 @@ glm_read_file(char *file_name, int verbose)
     if (verbose)
     {
 	if (show_att(ncid, NC_GLOBAL, TITLE))
-	    ERR;
+	    return GLM_ERR_MEMORY;
 	if (show_att(ncid, NC_GLOBAL, PLATFORM_ID))
-	    ERR;
+	    return GLM_ERR_MEMORY;
 	if (show_att(ncid, NC_GLOBAL, SUMMARY))
-	    ERR;
+	    return GLM_ERR_MEMORY;
     }
 
     /* Read the size of the dimensions. */
     if ((ret = read_dims(ncid, &nevents, &ngroups, &nflashes)))
-	ERR;
+	return GLM_ERR_MEMORY;
     
     if (verbose)
-	printf("nflashes %ld ngroups %ld nevents %ld\n", nflashes,
+	printf("nflashes %zu ngroups %zu nevents %zu\n", nflashes,
 	       ngroups, nevents);
 
     /* Allocate storage. */
     if (!(event = malloc(nevents * sizeof(GLM_EVENT_T))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(group = malloc(ngroups * sizeof(GLM_GROUP_T))))
-	ERR;
+	return GLM_ERR_MEMORY;
     if (!(flash = malloc(nflashes * sizeof(GLM_FLASH_T))))
-	ERR;
+	return GLM_ERR_MEMORY;
 
     /* Read the vars. */
     if ((ret = read_event_vars(ncid, nevents, event)))
-	ERR;
+	return GLM_ERR_MEMORY;
     if ((ret = read_group_vars(ncid, ngroups, group)))
-	ERR;
+	return GLM_ERR_MEMORY;
     if ((ret = read_flash_vars(ncid, nflashes, flash)))
-	ERR;
+	return GLM_ERR_MEMORY;
     if ((ret = read_scalars(ncid, &glm_scalar)))
-	ERR;
+	return GLM_ERR_MEMORY;
 
     /* Close the data file. */
     if ((ret = nc_close(ncid)))

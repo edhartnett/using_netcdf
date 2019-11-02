@@ -29,9 +29,18 @@
   [-v]        Verbose\n\
   [-t]        Perform timing runs\n"
 
-/* Read and unpack all the event data in the file. It will be loaded
- * into the pre-allocated array of struct event. */
-int
+/**
+ * Read and unpack all the event data in the file. It will be loaded
+ * into the pre-allocated array of struct event. 
+ *
+ * @param ncid ID of already opened GLM file.
+ * @param nevents The number of events.
+ * @param event Pointer to already-allocated arrat of GLM_EVENT_T.
+ *
+ * @return 0 for success, error code otherwise.
+ * @author Ed Hartnett
+*/
+static int
 read_event_vars(int ncid, int nevents, GLM_EVENT_T *event)
 {
     /* Event varids. */
@@ -148,6 +157,28 @@ read_event_vars(int ncid, int nevents, GLM_EVENT_T *event)
     if (event_parent_group_id)
 	free(event_parent_group_id);
   
+    return 0;
+}
+
+/**
+ * Read and unpack all the event data in the file. It will be loaded
+ * into the pre-allocated array of struct event. 
+ *
+ * @param ncid ID of already opened GLM file.
+ * @param nevents The number of events.
+ * @param event Pointer to already-allocated arrat of GLM_EVENT_T.
+ *
+ * @return 0 for success, error code otherwise.
+ * @author Ed Hartnett
+*/
+int
+glm_read_event_vars(int ncid, int nevents, GLM_EVENT_T *event)
+{
+    int ret;
+    
+    if ((ret = read_event_vars(ncid, nevents, event)))
+	return ret;
+    
     return 0;
 }
 
@@ -758,6 +789,85 @@ read_scalars(int ncid, GLM_SCALAR_T *glm_scalar)
 */
 int
 glm_read_file(char *file_name, int verbose)
+{
+    int ncid;
+
+    size_t nevents, ngroups, nflashes;
+
+    /* Structs of events, groups, flashes. */
+    GLM_EVENT_T *event;
+    GLM_GROUP_T *group;
+    GLM_FLASH_T *flash;
+    GLM_SCALAR_T glm_scalar;
+
+    int ret;
+    
+    /* Open the data file as read-only. */
+    if ((ret = nc_open(file_name, NC_NOWRITE, &ncid)))
+	NC_ERR(ret);
+
+    /* Optionally display some of the global attributes. The GLM data
+     * files comply with the CF Conventions, and other metadata
+     * standards. */
+    if (verbose)
+    {
+	if (show_att(ncid, NC_GLOBAL, TITLE))
+	    return GLM_ERR_MEMORY;
+	if (show_att(ncid, NC_GLOBAL, PLATFORM_ID))
+	    return GLM_ERR_MEMORY;
+	if (show_att(ncid, NC_GLOBAL, SUMMARY))
+	    return GLM_ERR_MEMORY;
+    }
+
+    /* Read the size of the dimensions. */
+    if ((ret = read_dims(ncid, &nevents, &ngroups, &nflashes)))
+	return GLM_ERR_MEMORY;
+    
+    if (verbose)
+	printf("nflashes %zu ngroups %zu nevents %zu\n", nflashes,
+	       ngroups, nevents);
+
+    /* Allocate storage. */
+    if (!(event = malloc(nevents * sizeof(GLM_EVENT_T))))
+	return GLM_ERR_MEMORY;
+    if (!(group = malloc(ngroups * sizeof(GLM_GROUP_T))))
+	return GLM_ERR_MEMORY;
+    if (!(flash = malloc(nflashes * sizeof(GLM_FLASH_T))))
+	return GLM_ERR_MEMORY;
+
+    /* Read the vars. */
+    if ((ret = read_event_vars(ncid, nevents, event)))
+	return GLM_ERR_MEMORY;
+    if ((ret = read_group_vars(ncid, ngroups, group)))
+	return GLM_ERR_MEMORY;
+    if ((ret = read_flash_vars(ncid, nflashes, flash)))
+	return GLM_ERR_MEMORY;
+    if ((ret = read_scalars(ncid, &glm_scalar)))
+	return GLM_ERR_MEMORY;
+
+    /* Close the data file. */
+    if ((ret = nc_close(ncid)))
+	NC_ERR(ret);
+
+    /* Free memory. */
+    free(event);
+    free(group);
+    free(flash);
+    
+    return 0;
+}
+
+/**
+ * Read the contents of the GLM file into arrays of data.
+ * 
+ * @param file_name GLM file to open and read.
+ * @param verbose Non-zero to get some printf output as file is read.
+ *
+ * @return 0 for success, error code otherwise.
+ * @author Ed Hartnett
+ */
+int
+glm_read_file_arrays(char *file_name, int verbose)
 {
     int ncid;
 

@@ -24,6 +24,9 @@
 #define SUMMARY "summary"
 #define PLATFORM_ID "platform_ID"
 
+/* Length of string to hold file names. */
+#define MAX_LEN 1024
+
 /* Number of timing runs when -t option is used. */
 #define NUM_TRIALS 10
 
@@ -73,7 +76,7 @@ main(int argc, char **argv)
     int meta_read_us = 0, meta_max_read_us = 0, meta_min_read_us = NC_MAX_INT;
     int meta_tot_read_us = 0, meta_avg_read_us;
     int num_trials = 1;
-    char new_file[1024];
+    char new_file[MAX_LEN];
     int t;
     
     while ((c = getopt(argc, argv, "vt")) != EOF)
@@ -101,8 +104,8 @@ main(int argc, char **argv)
 	 * buffered data from previous trials. */
 	if (timing)
 	{
-	    char cmd[1024];
-	    char base_name[1024];
+	    char cmd[MAX_LEN];
+	    char base_name[MAX_LEN];
 	    size_t len;
 
 	    len = strlen(GLM_DATA_FILE) - 3;
@@ -120,7 +123,7 @@ main(int argc, char **argv)
 	    ERR;
 
 	/* Read file. */
-	if (glm_read_file(new_file, verbose))
+	if (glm_read_file_arrays(new_file, verbose))
 	    ERR;
 
 	/* Handle timing. */
@@ -135,7 +138,7 @@ main(int argc, char **argv)
 
 	if (timing)
 	{
-	    char cmd[1024];
+	    char cmd[MAX_LEN];
 	    sprintf(cmd, "rm %s", new_file);
 	    system(cmd);
 	}

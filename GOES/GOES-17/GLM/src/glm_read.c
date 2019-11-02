@@ -159,13 +159,13 @@ read_event_vars(int ncid, int nevents, GLM_EVENT_T *event)
     {
 	event[i].id = event_id[i];
 	event[i].time_offset = (float)((unsigned short)event_time_offset[i]) *
-	    (unsigned short)event_time_offset_scale + (unsigned short)event_time_offset_offset;
+	    event_time_offset_scale + event_time_offset_offset;
 	event[i].lat = (float)((unsigned short)event_lat[i]) *
-	    (unsigned short)event_lat_scale + (unsigned short)event_lat_offset;
+	    event_lat_scale + event_lat_offset;
 	event[i].lon = (float)((unsigned short)event_lon[i]) *
-	    (unsigned short)event_lon_scale + (unsigned short)event_lon_offset;
+	    event_lon_scale + event_lon_offset;
 	event[i].energy = (float)((unsigned short)event_energy[i]) *
-	    (unsigned short)event_energy_scale + (unsigned short)event_energy_offset;
+	    event_energy_scale + event_energy_offset;
 	event[i].parent_group_id = event_parent_group_id[i];
     }
 
@@ -208,8 +208,13 @@ glm_read_event_vars(int ncid, int nevents, GLM_EVENT_T *event)
     return 0;
 }
 
-/* Read and unpack all the group data in the file. It will be loaded
- * into the pre-allocated array of struct group. */
+/**
+ * Read and unpack all the group data in the file. It will be loaded
+ * into the pre-allocated array of struct group. 
+ *
+ * @return 0 for success, error code otherwise.
+ * @author Ed Hartnett
+ */
 int
 read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
 {
@@ -328,13 +333,13 @@ read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
     {
 	group[i].id = group_id[i];
 	group[i].time_offset = (float)((unsigned short)group_time_offset[i]) *
-	    (unsigned short)group_time_offset_scale + (unsigned short)group_time_offset_offset;
+	    group_time_offset_scale + group_time_offset_offset;
 	group[i].lat = group_lat[i];
 	group[i].lon = group_lon[i];
 	group[i].area = (float)((unsigned short)group_area[i]) *
-	    (unsigned short)group_area_scale + (unsigned short)group_area_offset;
+	    group_area_scale + group_area_offset;
 	group[i].energy = (float)((unsigned short)group_energy[i]) *
-	    (unsigned short)group_energy_scale + (unsigned short)group_energy_offset;
+	    group_energy_scale + group_energy_offset;
 	group[i].parent_flash_id = group_parent_flash_id[i];
 	group[i].quality_flag = group_quality_flag[i];
     }
@@ -362,8 +367,13 @@ read_group_vars(int ncid, int ngroups, GLM_GROUP_T *group)
     return 0;
 }
 
-/* Read and unpack all the flash data in the file. It will be loaded
- * into the pre-allocated array of struct flash. */
+/**
+ * Read and unpack all the flash data in the file. It will be loaded
+ * into the pre-allocated array of struct flash.
+ *
+ * @return 0 for success, error code otherwise.
+ * @author Ed Hartnett
+ */
 int
 read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
 {
@@ -516,19 +526,19 @@ read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
     {
 	flash[i].id = flash_id[i];
 	flash[i].time_offset_of_first_event = (float)((unsigned short)flash_time_offset_of_first_event[i]) *
-	    (unsigned short)flash_time_offset_of_first_event_scale + (unsigned short)flash_time_offset_of_first_event_offset;
+	    flash_time_offset_of_first_event_scale + flash_time_offset_of_first_event_offset;
 	flash[i].time_offset_of_last_event = (float)((unsigned short)flash_time_offset_of_last_event[i]) *
-	    (unsigned short)flash_time_offset_of_last_event_scale + (unsigned short)flash_time_offset_of_last_event_offset;
+	    flash_time_offset_of_last_event_scale + flash_time_offset_of_last_event_offset;
 	flash[i].frame_time_offset_of_first_event = (float)((unsigned short)flash_frame_time_offset_of_first_event[i]) *
-	    (unsigned short)flash_frame_time_offset_of_first_event_scale + (unsigned short)flash_frame_time_offset_of_first_event_offset;
+	    flash_frame_time_offset_of_first_event_scale + flash_frame_time_offset_of_first_event_offset;
 	flash[i].frame_time_offset_of_last_event = (float)((unsigned short)flash_frame_time_offset_of_last_event[i]) *
-	    (unsigned short)flash_frame_time_offset_of_last_event_scale + (unsigned short)flash_frame_time_offset_of_last_event_offset;
+	    flash_frame_time_offset_of_last_event_scale + flash_frame_time_offset_of_last_event_offset;
 	flash[i].lat = flash_lat[i];
 	flash[i].lon = flash_lon[i];
-	flash[i].area = (float)((unsigned short)flash_area[i]) * (unsigned short)flash_area_scale +
-	    (unsigned short)flash_area_offset;
-	flash[i].energy = (float)((unsigned short)flash_energy[i]) * (unsigned short)flash_energy_scale +
-	    (unsigned short)flash_energy_offset;
+	flash[i].area = (float)((unsigned short)flash_area[i]) * flash_area_scale +
+	    flash_area_offset;
+	flash[i].energy = (float)((unsigned short)flash_energy[i]) * flash_energy_scale +
+	    flash_energy_offset;
 	flash[i].quality_flag = flash_quality_flag[i];
     }
 
@@ -557,6 +567,11 @@ read_flash_vars(int ncid, int nflashes, GLM_FLASH_T *flash)
     return 0;
 }
 
+/**
+ *
+ * @return 0 for success, error code otherwise.
+ * @author Ed Hartnett
+ */
 int
 read_dims(int ncid, size_t *nevents, size_t *ngroups, size_t *nflashes)
 {
@@ -610,6 +625,11 @@ read_dims(int ncid, size_t *nevents, size_t *ngroups, size_t *nflashes)
     return 0;
 }
 
+/**
+ *
+ * @return 0 for success, error code otherwise.
+ * @author Ed Hartnett
+ */
 int
 read_scalars(int ncid, GLM_SCALAR_T *glm_scalar)
 {
@@ -817,7 +837,10 @@ read_scalars(int ncid, GLM_SCALAR_T *glm_scalar)
 
   x = store_x/scale + offset.
 
-*/
+ *
+ * @return 0 for success, error code otherwise.
+ * @author Ed Hartnett
+ */
 int
 glm_read_file(char *file_name, int verbose)
 {
